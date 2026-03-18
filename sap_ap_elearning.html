@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAP FI-AP: Accounts Payable Essentials</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f4f8;
+  --white: #ffffff;
+  --surface: #e8eef5;
+  --surface2: #dce5ef;
+  --ink: #0d1b2a;
+  --ink2: #1e3448;
+  --muted: #607a96;
+  --border: rgba(13,27,42,0.1);
+  --sap-blue: #0070f2;
+  --sap-teal: #0abf8a;
+  --sap-amber: #f0a500;
+  --sap-red: #e03030;
+  --sap-purple: #7c3aed;
+  --sap-navy: #003264;
+  --radius: 10px;
+  --shadow: 0 2px 16px rgba(0,70,180,0.08);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 400;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 58px;
+  background: var(--sap-navy);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 1rem; }
+.sap-logo {
+  background: var(--sap-blue);
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+}
+.course-badge {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.course-badge strong { color: #fff; font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 1.5rem; }
+.slide-counter {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+}
+.slide-counter span { color: var(--sap-teal); font-weight: 500; }
+.xp-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 0.25rem 0.8rem;
+  font-size: 0.72rem;
+  color: var(--sap-amber);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── PROGRESS ── */
+.progress-bar-wrap {
+  height: 4px;
+  background: rgba(0,50,100,0.15);
+  flex-shrink: 0;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sap-blue), var(--sap-teal));
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: 50%;
+  transform: translateY(-50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--sap-teal);
+  box-shadow: 0 0 10px var(--sap-teal);
+}
+
+/* ── SLIDES ── */
+.slides-wrapper { flex: 1; overflow: hidden; position: relative; }
+.slide {
+  position: absolute; inset: 0;
+  padding: 2.5rem 3.5rem;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.slide.active { display: flex; opacity: 1; transform: translateX(0); }
+.slide.exit-left { display: flex; opacity: 0; transform: translateX(-30px); }
+.slide.enter-right { display: flex; opacity: 0; transform: translateX(30px); }
+
+/* ── FOOTER ── */
+.footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 62px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  box-shadow: 0 -2px 12px rgba(0,70,180,0.06);
+}
+.nav-btn {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  padding: 0.6rem 1.5rem;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--ink2);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+.nav-btn:hover:not(:disabled) {
+  border-color: var(--sap-blue);
+  color: var(--sap-blue);
+  background: rgba(0,112,242,0.04);
+}
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.nav-btn.primary {
+  background: var(--sap-blue);
+  border-color: var(--sap-blue);
+  color: #fff;
+}
+.nav-btn.primary:hover { background: #0057c2; }
+
+.breadcrumbs { display: flex; gap: 5px; align-items: center; }
+.crumb {
+  width: 28px; height: 5px;
+  border-radius: 3px;
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.crumb.done { background: var(--sap-teal); }
+.crumb.active { background: var(--sap-blue); width: 36px; }
+.crumb:hover { opacity: 0.7; }
+
+/* ── TYPOGRAPHY ── */
+.slide-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sap-blue);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.slide-tag::before { content:''; width:16px; height:2px; background:var(--sap-blue); }
+.slide-h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem,3.5vw,3rem);
+  line-height: 1.1;
+  color: var(--sap-navy);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.8rem;
+}
+.slide-h1 .hi { color: var(--sap-blue); }
+.slide-h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.3rem,2.2vw,1.8rem);
+  color: var(--sap-navy);
+  line-height: 1.2;
+  margin-bottom: 0.8rem;
+}
+.slide-h2 .hi { color: var(--sap-blue); }
+.slide-body {
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--muted);
+  max-width: 68ch;
+}
+.slide-body strong { color: var(--ink2); font-weight: 600; }
+
+/* ── LAYOUTS ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+.two-col-wide { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+
+/* ── CARD SYSTEM ── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  box-shadow: var(--shadow);
+  transition: all 0.22s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,70,180,0.12); }
+.card-icon { font-size: 1.8rem; margin-bottom: 0.7rem; display: block; }
+.card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink2);
+  margin-bottom: 0.4rem;
+}
+.card-body { font-size: 0.78rem; line-height: 1.6; color: var(--muted); }
+
+/* ── CLICKABLE REVEAL ── */
+.reveal-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+.reveal-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--sap-blue);
+  transform: scaleY(0);
+  transition: transform 0.25s;
+  transform-origin: top;
+}
+.reveal-card:hover { border-color: var(--sap-blue); }
+.reveal-card:hover::after { transform: scaleY(1); }
+.reveal-card.open { border-color: var(--sap-teal); background: rgba(10,191,138,0.03); }
+.reveal-card.open::after { transform: scaleY(1); background: var(--sap-teal); }
+.rc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+.rc-title { font-weight: 600; font-size: 0.88rem; color: var(--ink2); display: flex; align-items: center; gap: 0.6rem; }
+.rc-icon { font-size: 1.1rem; }
+.rc-arrow {
+  font-size: 0.7rem;
+  color: var(--muted);
+  transition: transform 0.25s;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.reveal-card.open .rc-arrow { transform: rotate(90deg); color: var(--sap-teal); }
+.rc-body {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--muted);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, margin 0.25s;
+}
+.reveal-card.open .rc-body { max-height: 300px; margin-top: 0.8rem; }
+.rc-body code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  background: var(--surface);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  color: var(--sap-navy);
+}
+
+/* ── SAP SCREEN SIMULATOR ── */
+.sap-screen {
+  background: #fff;
+  border: 1px solid #c0cdd8;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,50,100,0.12);
+  font-size: 0.75rem;
+}
+.sap-titlebar {
+  background: var(--sap-navy);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sap-titlebar-icons { display: flex; gap: 5px; }
+.sap-titlebar-icons span {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+}
+.sap-menubar {
+  background: #e8eef5;
+  border-bottom: 1px solid #c0cdd8;
+  padding: 0 0.6rem;
+  display: flex;
+  gap: 0;
+}
+.sap-menu-item {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.68rem;
+  cursor: pointer;
+  color: var(--ink2);
+  border-right: 1px solid #c0cdd8;
+  transition: background 0.15s;
+}
+.sap-menu-item:hover { background: var(--sap-blue); color: #fff; }
+.sap-toolbar {
+  background: #f5f7fa;
+  border-bottom: 1px solid #d8e2ec;
+  padding: 0.3rem 0.6rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.sap-tb-btn {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #b0c0d0;
+  border-radius: 3px;
+  background: #fff;
+  font-size: 0.65rem;
+  cursor: pointer;
+  color: var(--ink2);
+  transition: all 0.15s;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.sap-tb-btn:hover { background: var(--sap-blue); color: #fff; border-color: var(--sap-blue); }
+.sap-tb-btn.active { background: var(--sap-teal); color: #fff; border-color: var(--sap-teal); }
+.sap-body { padding: 0.8rem; }
+.sap-field-group { margin-bottom: 0.7rem; }
+.sap-label {
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.sap-field {
+  border: 1px solid #b0c0d0;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--ink2);
+  background: #fff;
+  width: 100%;
+  cursor: text;
+  transition: border-color 0.15s;
+}
+.sap-field:focus { outline: none; border-color: var(--sap-blue); }
+.sap-field.filled { background: #f0f8ff; color: var(--sap-navy); border-color: #90b8e0; }
+.sap-field.required { border-left: 3px solid var(--sap-blue); }
+.sap-field.error { border-color: var(--sap-red); background: #fff5f5; }
+.sap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.sap-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+.sap-section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--sap-navy);
+  background: #e8f0fa;
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid var(--sap-blue);
+  letter-spacing: 0.04em;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.sap-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
+.sap-table th {
+  background: #e8eef5;
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid #c0cdd8;
+  font-weight: 500;
+}
+.sap-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid #eef2f7;
+  color: var(--ink2);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.sap-table tr:hover td { background: #f0f6ff; }
+.sap-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+}
+.status-open { background: #fff3cd; color: #856404; }
+.status-posted { background: #d4edda; color: #155724; }
+.status-blocked { background: #f8d7da; color: #721c24; }
+.status-partial { background: #d1ecf1; color: #0c5460; }
+
+/* ── QUIZ ── */
+.scenario-box {
+  background: linear-gradient(135deg, #e8f0fa 0%, #f0f6ff 100%);
+  border-left: 4px solid var(--sap-blue);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--ink2);
+}
+.scenario-box strong { color: var(--sap-navy); }
+.scenario-box .tcode {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  background: var(--sap-navy);
+  color: var(--sap-teal);
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+}
+.choice-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.choice-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  color: var(--ink2);
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  line-height: 1.5;
+}
+.choice-btn:hover:not(.locked) { border-color: var(--sap-blue); background: rgba(0,112,242,0.03); }
+.choice-btn.correct { border-color: var(--sap-teal); background: rgba(10,191,138,0.06); color: #0a7a59; }
+.choice-btn.wrong { border-color: var(--sap-red); background: rgba(224,48,48,0.05); color: #9b1414; }
+.choice-btn.locked { cursor: default; }
+.choice-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+.choice-btn.correct .choice-label { background: var(--sap-teal); color: #fff; border-color: var(--sap-teal); }
+.choice-btn.wrong .choice-label { background: var(--sap-red); color: #fff; border-color: var(--sap-red); }
+.feedback-box {
+  margin-top: 0.8rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  display: none;
+}
+.feedback-box.show { display: block; }
+.feedback-box.good { background: rgba(10,191,138,0.08); border: 1px solid rgba(10,191,138,0.3); color: #0a7a59; }
+.feedback-box.bad { background: rgba(224,48,48,0.07); border: 1px solid rgba(224,48,48,0.25); color: #9b1414; }
+.feedback-box code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  background: rgba(0,0,0,0.06);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* ── PROCESS FLOW ── */
+.flow-steps { display: flex; flex-direction: column; gap: 0; }
+.flow-step {
+  display: flex;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+  border-radius: 4px;
+  padding: 0.8rem;
+}
+.flow-step:hover { background: rgba(0,112,242,0.03); }
+.flow-step.active { background: rgba(0,112,242,0.05); }
+.flow-dot-col { display: flex; flex-direction: column; align-items: center; }
+.flow-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.flow-step.active .flow-dot { background: var(--sap-blue); border-color: var(--sap-blue); color: #fff; }
+.flow-line { width: 2px; flex: 1; background: var(--border); margin: 3px 0; min-height: 12px; }
+.flow-content { flex: 1; padding-top: 0.3rem; }
+.flow-title { font-weight: 600; font-size: 0.88rem; color: var(--ink2); margin-bottom: 0; }
+.flow-step.active .flow-title { color: var(--sap-blue); }
+.flow-detail {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, margin 0.2s;
+}
+.flow-step.active .flow-detail { max-height: 200px; margin-top: 0.4rem; }
+.flow-tcode {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  background: var(--sap-navy);
+  color: var(--sap-teal);
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+/* ── DRAG DROP MATCH ── */
+.match-game { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.match-col-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.match-item {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  user-select: none;
+}
+.match-item:hover { border-color: var(--sap-blue); }
+.match-item.selected { border-color: var(--sap-blue); background: rgba(0,112,242,0.06); color: var(--sap-blue); }
+.match-item.matched-ok { border-color: var(--sap-teal); background: rgba(10,191,138,0.06); color: #0a7a59; cursor: default; }
+.match-item.matched-err { border-color: var(--sap-red); background: rgba(224,48,48,0.06); color: var(--sap-red); cursor: default; }
+.match-item .mi-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.match-item.selected .mi-num { background: var(--sap-blue); color: #fff; border-color: var(--sap-blue); }
+.match-item.matched-ok .mi-num { background: var(--sap-teal); color: #fff; border-color: var(--sap-teal); }
+.match-check-btn {
+  margin-top: 1rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.55rem 1.3rem;
+  background: var(--sap-blue);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.18s;
+  letter-spacing: 0.03em;
+}
+.match-check-btn:hover { background: #0057c2; }
+
+/* ── CHECKLIST ── */
+.checklist { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.check-item:hover { border-color: var(--sap-blue); }
+.check-item.checked { border-color: var(--sap-teal); background: rgba(10,191,138,0.04); }
+.check-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  margin-top: 0.1rem;
+}
+.check-item.checked .check-box { background: var(--sap-teal); border-color: var(--sap-teal); color: #fff; font-size: 0.7rem; }
+.check-box::after { content: ''; }
+.check-item.checked .check-box::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; }
+.check-text { flex: 1; color: var(--ink2); }
+.check-item.checked .check-text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--sap-teal); }
+
+/* ── TABS ── */
+.tab-bar { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 1.2rem; }
+.tab {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.18s;
+  letter-spacing: 0.02em;
+}
+.tab:hover { color: var(--sap-blue); }
+.tab.active { color: var(--sap-blue); border-bottom-color: var(--sap-blue); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── INFO CARDS (non-interactive) ── */
+.info-strip {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.2rem;
+  flex-wrap: wrap;
+}
+.info-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.72rem;
+  color: var(--ink2);
+  font-weight: 500;
+  box-shadow: var(--shadow);
+}
+.info-chip .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+/* ── CERTIFICATE ── */
+.cert-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto;
+  box-shadow: 0 8px 40px rgba(0,70,180,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.cert-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--sap-blue), var(--sap-teal), var(--sap-amber));
+}
+.cert-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.cert-badge-icon { font-size: 3rem; }
+.cert-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--sap-navy);
+  margin-bottom: 0.3rem;
+}
+.cert-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.2rem; }
+.cert-name {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--sap-blue);
+  margin-bottom: 0.3rem;
+}
+.cert-course {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+.cert-skills { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+.cert-skill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.7rem;
+  border-radius: 100px;
+  border: 1px solid var(--sap-blue);
+  color: var(--sap-blue);
+  background: rgba(0,112,242,0.04);
+}
+.cert-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--sap-navy), var(--sap-blue));
+  color: #fff;
+  border-radius: 100px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ── XP SCORE ── */
+#xp-display { transition: all 0.3s; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c0cdd8; border-radius: 2px; }
+
+/* ── HOTSPOT SIM ── */
+.ap-dashboard {
+  background: #f5f7fa;
+  border: 1px solid #c0cdd8;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ap-dash-header {
+  background: var(--sap-navy);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.72rem;
+  font-family: 'IBM Plex Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ap-dash-body { padding: 1rem; display: grid; grid-template-columns: repeat(3,1fr); gap: 0.8rem; }
+.ap-kpi {
+  background: var(--white);
+  border: 1px solid #d8e2ec;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.ap-kpi::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.ap-kpi:nth-child(1)::after { background: var(--sap-blue); }
+.ap-kpi:nth-child(2)::after { background: var(--sap-amber); }
+.ap-kpi:nth-child(3)::after { background: var(--sap-red); }
+.ap-kpi:nth-child(4)::after { background: var(--sap-teal); }
+.ap-kpi:nth-child(5)::after { background: var(--sap-purple); }
+.ap-kpi:nth-child(6)::after { background: #0097a7; }
+.ap-kpi:hover { border-color: var(--sap-blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,70,180,0.1); }
+.ap-kpi.hs-open { border-color: var(--sap-blue); background: #f0f6ff; }
+.kpi-num {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--sap-navy);
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.kpi-label {
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.kpi-tooltip {
+  display: none;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ink2);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+}
+.ap-kpi.hs-open .kpi-tooltip { display: block; }
+
+/* ── PILL ── */
+.pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.7rem;
+  border-radius: 100px;
+  border: 1px solid var(--sap-blue);
+  color: var(--sap-blue);
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+@media (max-width: 820px) {
+  .two-col,.two-col-wide { grid-template-columns:1fr; gap:1.5rem; }
+  .three-col { grid-template-columns:1fr; }
+  .match-game { grid-template-columns:1fr; }
+  .slide { padding:1.5rem; }
+  .header,.footer-nav { padding:0 1rem; }
+  .ap-dash-body { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="sap-logo">SAP</div>
+    <div class="course-badge"><strong>FI-AP</strong> · Accounts Payable Essentials</div>
+  </div>
+  <div class="header-right">
+    <div class="xp-display">
+      <div class="xp-badge">⭐ <span id="xp-display">0</span> XP</div>
+    </div>
+    <div class="slide-counter">Slide <span id="cur-num">1</span> / <span id="tot-num">10</span></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar-wrap">
+  <div class="progress-fill" id="progress-fill" style="width:10%"></div>
+</div>
+
+<!-- SLIDES -->
+<div class="slides-wrapper">
+
+  <!-- SLIDE 1: WELCOME -->
+  <div class="slide active" data-slide="1">
+    <div class="two-col">
+      <div>
+        <div class="slide-tag">Course Introduction</div>
+        <h1 class="slide-h1">SAP <span class="hi">Accounts Payable</span><br>Essentials</h1>
+        <p class="slide-body">
+          Master the end-to-end Accounts Payable process in <strong>SAP FI-AP</strong> — from vendor master setup and invoice entry to payment runs and reconciliation. This course is designed for finance clerks, AP specialists, and ERP users working in SAP ECC or S/4HANA environments.
+        </p>
+        <div style="margin-top:1.2rem">
+          <span class="pill">SAP FI-AP</span>
+          <span class="pill">ECC & S/4HANA</span>
+          <span class="pill">~30 min</span>
+          <span class="pill">Interactive Simulations</span>
+        </div>
+        <div class="info-strip">
+          <div class="info-chip"><span class="dot" style="background:var(--sap-blue)"></span> Vendor Master</div>
+          <div class="info-chip"><span class="dot" style="background:var(--sap-teal)"></span> Invoice Posting</div>
+          <div class="info-chip"><span class="dot" style="background:var(--sap-amber)"></span> Payment Runs</div>
+          <div class="info-chip"><span class="dot" style="background:var(--sap-purple)"></span> Reconciliation</div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow)">
+          <div class="slide-tag" style="margin-bottom:1rem">Learning Objectives</div>
+          <div class="flow-steps" id="obj-flow">
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot">01</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Navigate SAP FI-AP module</div>
+                <div class="flow-detail">Understand the structure of the FI module, key t-codes, and how AP integrates with MM (Materials Management) and FI-GL (General Ledger).</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot">02</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Create and manage Vendor Masters</div>
+                <div class="flow-detail">Set up vendor master records with correct account groups, payment terms, bank details, and reconciliation accounts using t-code XK01 / FK01.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot">03</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Post and manage AP invoices</div>
+                <div class="flow-detail">Enter vendor invoices (FB60), park documents, perform 3-way matching, and handle credit memos using standard SAP document flow.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot">04</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Execute the F110 Payment Run</div>
+                <div class="flow-detail">Configure and execute automatic payment programs, manage payment proposals, and understand payment medium workbench output.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot">05</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Reconcile and report AP balances</div>
+                <div class="flow-detail">Run aging analysis, vendor balance reports (FK10N), and reconcile AP subledger with the general ledger using standard SAP reports.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: AP PROCESS FLOW -->
+  <div class="slide" data-slide="2">
+    <div class="slide-tag">Module 1 — AP Process Overview</div>
+    <div class="two-col-wide">
+      <div>
+        <h2 class="slide-h2">The <span class="hi">Procure-to-Pay</span> Cycle</h2>
+        <p class="slide-body" style="margin-bottom:1.2rem">SAP AP sits at the end of the Procure-to-Pay (P2P) cycle. Click each step to understand what happens in SAP at each stage.</p>
+        <div class="flow-steps">
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Purchase Requisition <span class="flow-tcode">ME51N</span></div>
+              <div class="flow-detail">Internal request to procure goods/services. Approved by relevant cost center manager. Generated in SAP MM module — AP receives downstream impact.</div>
+            </div>
+          </div>
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Purchase Order <span class="flow-tcode">ME21N</span></div>
+              <div class="flow-detail">Legal commitment to vendor. Contains quantity, price, delivery date, payment terms, and GL account assignment. This drives the expected invoice value in AP.</div>
+            </div>
+          </div>
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">3</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Goods Receipt <span class="flow-tcode">MIGO</span></div>
+              <div class="flow-detail">Confirms physical delivery of goods. SAP posts a GR/IR clearing account debit. This creates the "open item" that AP invoice matching clears against.</div>
+            </div>
+          </div>
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">4</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Invoice Verification <span class="flow-tcode">MIRO / FB60</span></div>
+              <div class="flow-detail">AP clerk enters vendor invoice. SAP performs 3-way match (PO + GR + Invoice). Tolerances apply — variances outside limits trigger a payment block automatically.</div>
+            </div>
+          </div>
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">5</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Payment Run <span class="flow-tcode">F110</span></div>
+              <div class="flow-detail">Automatic payment program selects open items due for payment based on baseline date, payment terms, and cash discount rules. Generates payment file for bank.</div>
+            </div>
+          </div>
+          <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-dot-col"><div class="flow-dot">6</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <div class="flow-title">Bank Reconciliation <span class="flow-tcode">FF67 / FEBAN</span></div>
+              <div class="flow-detail">Match bank statement with SAP payment postings. Clear open items in the bank clearing account. Resolve exceptions for bounced or delayed payments.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);margin-bottom:1rem;">
+          <div class="slide-tag" style="margin-bottom:0.8rem">Key AP Documents</div>
+          <table class="sap-table" style="font-size:0.72rem">
+            <thead>
+              <tr>
+                <th>Document Type</th>
+                <th>SAP Key</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Vendor Invoice</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--sap-blue)">KR</td><td><span class="sap-status status-posted">● Posted</span></td></tr>
+              <tr><td>Credit Memo</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--sap-blue)">KG</td><td><span class="sap-status status-open">● Open</span></td></tr>
+              <tr><td>Down Payment</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--sap-blue)">KA</td><td><span class="sap-status status-partial">● Partial</span></td></tr>
+              <tr><td>Payment Doc</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--sap-blue)">ZP</td><td><span class="sap-status status-posted">● Cleared</span></td></tr>
+              <tr><td>Parked Invoice</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--sap-blue)">KR</td><td><span class="sap-status status-blocked">● Blocked</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background:rgba(0,112,242,0.04);border:1px solid rgba(0,112,242,0.15);border-radius:var(--radius);padding:1.2rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--sap-navy);margin-bottom:0.4rem;">💡 Key Integration Point</div>
+          <div style="font-size:0.78rem;line-height:1.6;color:var(--muted);">AP is a <strong style="color:var(--ink2)">subledger</strong> of FI-GL. Every AP posting automatically updates the vendor reconciliation account in the General Ledger — keeping the subledger and GL always in sync without manual journaling.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: VENDOR MASTER SIMULATION -->
+  <div class="slide" data-slide="3">
+    <div class="slide-tag">Module 2 — Vendor Master · T-Code: XK01</div>
+    <div class="two-col-wide">
+      <div>
+        <h2 class="slide-h2">Create a <span class="hi">Vendor Master</span></h2>
+        <p class="slide-body" style="margin-bottom:1rem">The vendor master is the foundation of all AP transactions. Fields marked in <strong style="color:var(--sap-blue)">blue</strong> are required. Click each field to explore what it means.</p>
+        <div class="sap-screen">
+          <div class="sap-titlebar">
+            <span>Create Vendor: Initial Screen</span>
+            <div class="sap-titlebar-icons"><span></span><span></span><span></span></div>
+          </div>
+          <div class="sap-menubar">
+            <div class="sap-menu-item">Vendor</div>
+            <div class="sap-menu-item">Edit</div>
+            <div class="sap-menu-item">Goto</div>
+            <div class="sap-menu-item">Extras</div>
+            <div class="sap-menu-item">Help</div>
+          </div>
+          <div class="sap-toolbar">
+            <div class="sap-tb-btn active" onclick="simClick(this,'Saved — Vendor 100234 Created')">💾 Save</div>
+            <div class="sap-tb-btn" onclick="simClick(this,'Checking required fields...')">✓ Check</div>
+            <div class="sap-tb-btn" onclick="simClick(this,'Back to vendor list')">← Back</div>
+            <div class="sap-tb-btn" onclick="simClick(this,'Displaying next screen')">⏭ Next</div>
+          </div>
+          <div class="sap-body">
+            <div class="sap-section-title">ORGANIZATIONAL DATA</div>
+            <div class="sap-grid">
+              <div class="sap-field-group">
+                <div class="sap-label">Account Group *</div>
+                <input class="sap-field required filled" value="LIEF (Domestic Vendor)" onfocus="showFieldTip('Account Group determines number range, field control, and vendor category (domestic/foreign/one-time). Always match to vendor type.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Company Code *</div>
+                <input class="sap-field required filled" value="1000" onfocus="showFieldTip('Company Code 1000 = US Entity. Vendor master is created per company code — same vendor can have different payment terms per entity.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Purchasing Org.</div>
+                <input class="sap-field filled" value="1000" onfocus="showFieldTip('Required only if vendor is also a purchasing partner. Links vendor to procurement view for PO processing.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Reconciliation Acct *</div>
+                <input class="sap-field required filled" value="160000" onfocus="showFieldTip('GL account where all AP subledger postings are summarized. Must be a vendor reconciliation account type. Critical for financial statements.')">
+              </div>
+            </div>
+            <div class="sap-section-title" style="margin-top:0.7rem">PAYMENT DATA</div>
+            <div class="sap-grid">
+              <div class="sap-field-group">
+                <div class="sap-label">Payment Terms *</div>
+                <input class="sap-field required filled" value="NT30 (Net 30 Days)" onfocus="showFieldTip('Drives baseline date calculation and cash discount eligibility. NT30 = full amount due 30 days from invoice date. Configurable in OBB8.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Payment Method</div>
+                <input class="sap-field filled" value="C (Check)" onfocus="showFieldTip('C = Check, T = Wire Transfer, B = Bank Transfer (ACH). Determines which payment medium the F110 run uses to generate output.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Bank Account</div>
+                <input class="sap-field filled" value="****4521" onfocus="showFieldTip('Vendor bank account for ACH/wire payments. Requires bank key + account number + IBAN for international vendors. Stored with encryption.')">
+              </div>
+              <div class="sap-field-group">
+                <div class="sap-label">Withholding Tax</div>
+                <input class="sap-field" placeholder="(if applicable)" onfocus="showFieldTip('Required for 1099 vendors (US) or WHT-eligible vendors. Configure tax code, base amount, and exemption certificates here.')">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="field-tip" style="display:none;margin-top:0.8rem;background:rgba(0,112,242,0.06);border:1px solid rgba(0,112,242,0.2);border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;line-height:1.6;color:var(--ink2);">
+          <strong style="color:var(--sap-blue)">Field Info:</strong> <span id="field-tip-text"></span>
+        </div>
+        <div id="sim-msg" style="display:none;margin-top:0.6rem;background:rgba(10,191,138,0.08);border:1px solid rgba(10,191,138,0.3);border-radius:6px;padding:0.5rem 1rem;font-size:0.78rem;color:#0a7a59;font-family:'IBM Plex Mono',monospace;"></div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow)">
+          <div class="slide-tag" style="margin-bottom:0.8rem">Vendor Master Tabs</div>
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-gen')">General</div>
+            <div class="tab" onclick="switchTab(this,'tab-co')">Company</div>
+            <div class="tab" onclick="switchTab(this,'tab-pur')">Purchasing</div>
+          </div>
+          <div class="tab-panel active" id="tab-gen">
+            <div class="checklist">
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Name 1 (vendor legal name)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Street address + Country + Region</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Language key (communication language)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Tax number (EIN / VAT Registration)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Contact person + phone + email</div></div>
+            </div>
+            <p style="font-size:0.72rem;color:var(--muted);margin-top:0.8rem;">✓ Check all fields to verify your data entry.</p>
+          </div>
+          <div class="tab-panel" id="tab-co">
+            <div class="checklist">
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Reconciliation account (GL 160000)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Sort key (layout of AP line items)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Payment terms (NT30 / NT45 etc.)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Payment method (C/T/B)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Payment block indicator (if needed)</div></div>
+            </div>
+          </div>
+          <div class="tab-panel" id="tab-pur">
+            <div class="checklist">
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Order currency (USD/EUR etc.)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Incoterms (CIF / FOB / EXW)</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Minimum order value</div></div>
+              <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">GR-based invoice verification flag</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: INVOICE ENTRY QUIZ -->
+  <div class="slide" data-slide="4">
+    <div class="slide-tag">Module 3 — Invoice Entry · Knowledge Check</div>
+    <div class="two-col">
+      <div>
+        <h2 class="slide-h2">Posting an <span class="hi">AP Invoice</span></h2>
+        <p class="slide-body" style="margin-bottom:1rem">In SAP FI-AP, the t-code <strong>FB60</strong> is used for direct vendor invoice entry (non-PO invoices). <strong>MIRO</strong> is used for PO-based 3-way match invoices. Click each element to learn more.</p>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">📄</span> What is a 3-Way Match?</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">SAP automatically compares: <strong>Purchase Order</strong> (what was ordered) + <strong>Goods Receipt</strong> (what was delivered) + <strong>Vendor Invoice</strong> (what is billed). All three must match within configured tolerance limits. If they don't, SAP sets a <code>payment block (R)</code> on the document automatically.</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">⚠️</span> Payment Block Codes</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">SAP uses single-character codes: <code>R</code> = Invoice verification block (tolerance exceeded), <code>A</code> = Free for payment, <code>B</code> = Manual block set by AP, <code>Z</code> = Block from payment proposal. Release blocks using <code>MRBR</code> (GR/IR block release) or <code>FB02</code> (manual document change).</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">🔢</span> Baseline Date Logic</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">Baseline date determines when payment is due. SAP calculates: <code>Baseline Date + Payment Term Days = Due Date</code>. The baseline date can be set to posting date, invoice date, or document date — controlled by the payment terms configuration in <code>OBB8</code>. Getting this wrong causes early or late payments.</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">💳</span> Credit Memos (T-Code: FB65)</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">Credit memos reduce the amount owed to a vendor — for returns, price corrections, or billing disputes. In SAP, credit memos are posted with document type <code>KG</code>. They appear as credit open items and are automatically offset against debit invoices during the F110 payment run.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="scenario-box">
+          <strong>Scenario:</strong> An AP clerk posts a vendor invoice using <span class="tcode">MIRO</span> for USD 5,200. The matching PO shows USD 5,000 and the GR confirms full delivery. The company's invoice tolerance is ±3%. What will SAP do?
+        </div>
+        <div class="choice-list" id="q1-choices">
+          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+            <div class="choice-label">A</div>
+            Post the invoice and pay USD 5,200 in the next F110 run automatically.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q1',this,'correct')">
+            <div class="choice-label">B</div>
+            Post the invoice but set payment block code <strong>R</strong> — the variance (4%) exceeds tolerance.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+            <div class="choice-label">C</div>
+            Reject the invoice and send an automatic vendor notification.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+            <div class="choice-label">D</div>
+            Post at USD 5,000 and write off the USD 200 variance to a P&L account.
+          </div>
+        </div>
+        <div class="feedback-box good" id="q1-good">
+          ✅ <strong>Correct!</strong> The variance is $200/$5,000 = <strong>4%</strong>, which exceeds the 3% tolerance. SAP posts the document successfully but applies payment block <code>R</code>. The AP team must investigate, obtain approval, and release the block via <code>MRBR</code> before the invoice is eligible for payment.
+        </div>
+        <div class="feedback-box bad" id="q1-bad">
+          ❌ <strong>Not quite.</strong> SAP does NOT reject the invoice or auto-adjust the amount. It posts the document — but applies a <strong>payment block R</strong> because the 4% variance exceeds the 3% tolerance configured for this company code. The block must be manually released.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: AP DASHBOARD HOTSPOT -->
+  <div class="slide" data-slide="5">
+    <div class="slide-tag">Module 3 — AP Aging & Reporting</div>
+    <div class="two-col-wide">
+      <div>
+        <h2 class="slide-h2">AP <span class="hi">Dashboard</span> Deep Dive</h2>
+        <p class="slide-body" style="margin-bottom:1rem">Click each KPI tile to understand what it measures, which SAP report generates it, and what action to take when it's off-target.</p>
+        <div class="ap-dashboard">
+          <div class="ap-dash-header">
+            <span>📊 AP Operations Dashboard — Period 03/2026</span>
+            <span style="color:rgba(255,255,255,0.5);font-size:0.62rem;">Company Code: 1000 | Currency: USD</span>
+          </div>
+          <div class="ap-dash-body">
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">$2.4M</div>
+              <div class="kpi-label">Open AP Balance</div>
+              <div class="kpi-tooltip"><strong>T-Code: FK10N</strong><br>Total outstanding invoices not yet paid. High balance may indicate bottlenecks in approval or payment runs. Review aging buckets to identify overdue items.</div>
+            </div>
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">$183K</div>
+              <div class="kpi-label">Overdue &gt;30 Days</div>
+              <div class="kpi-tooltip"><strong>T-Code: S_ALR_87012078</strong><br>Invoices past due date by 30+ days. Overdue AP risks vendor relationship damage and late payment penalties. Prioritize in next F110 run.</div>
+            </div>
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">14</div>
+              <div class="kpi-label">Blocked Invoices</div>
+              <div class="kpi-tooltip"><strong>T-Code: MRBR / MIR6</strong><br>Invoices with payment block R, B, or Z. Each blocked invoice needs investigation — price variance, missing GR, or manual hold. Target: resolve within 48 hrs.</div>
+            </div>
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">97.2%</div>
+              <div class="kpi-label">On-Time Payment Rate</div>
+              <div class="kpi-tooltip"><strong>T-Code: F110 Log</strong><br>% of invoices paid on or before due date. Below 95% signals process issues. Above 99% is world-class. Track by vendor category and company code.</div>
+            </div>
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">$4,200</div>
+              <div class="kpi-label">Discounts Captured</div>
+              <div class="kpi-tooltip"><strong>T-Code: S_ALR_87012103</strong><br>Cash discounts earned by paying within early payment discount window (e.g., 2/10 Net 30). Uncaptured discounts are lost savings — review payment term optimization.</div>
+            </div>
+            <div class="ap-kpi" onclick="toggleKPI(this)">
+              <div class="kpi-num">3</div>
+              <div class="kpi-label">Duplicate Suspects</div>
+              <div class="kpi-tooltip"><strong>T-Code: FB60 / RFAP0001</strong><br>Potential duplicate invoices flagged by SAP duplicate invoice check. Always verify before payment — same vendor, same amount, same reference number = likely duplicate.</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;text-align:center;font-family:'IBM Plex Mono',monospace;">↑ Click each KPI to see the SAP t-code and action guidance</p>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow)">
+          <div class="slide-tag" style="margin-bottom:0.8rem">AP Aging Buckets</div>
+          <table class="sap-table">
+            <thead>
+              <tr><th>Aging Bucket</th><th>Amount (USD)</th><th>% of Total</th><th>Priority</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Current (0–30d)</td><td>$1,890,000</td><td>78.8%</td><td><span class="sap-status status-posted">Normal</span></td></tr>
+              <tr><td>31–60 Days</td><td>$327,000</td><td>13.6%</td><td><span class="sap-status status-partial">Monitor</span></td></tr>
+              <tr><td>61–90 Days</td><td>$138,000</td><td>5.7%</td><td><span class="sap-status status-open">Urgent</span></td></tr>
+              <tr><td>&gt;90 Days</td><td>$45,000</td><td>1.9%</td><td><span class="sap-status status-blocked">Critical</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:1rem;background:rgba(240,165,0,0.07);border:1px solid rgba(240,165,0,0.2);border-radius:8px;padding:0.8rem;">
+            <div style="font-size:0.78rem;font-weight:700;color:#856404;margin-bottom:0.3rem;">⚠️ Action Required</div>
+            <div style="font-size:0.75rem;line-height:1.6;color:var(--muted);">61–90 day bucket requires immediate escalation to AP manager. Items &gt;90 days may require vendor dispute resolution and write-off approval per company policy.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: F110 PAYMENT RUN SIMULATION -->
+  <div class="slide" data-slide="6">
+    <div class="slide-tag">Module 4 — F110 Payment Run</div>
+    <div class="two-col-wide">
+      <div>
+        <h2 class="slide-h2">The <span class="hi">F110</span> Automatic Payment Program</h2>
+        <p class="slide-body" style="margin-bottom:0.8rem">F110 is the most critical t-code in SAP AP. It selects open items, creates a payment proposal, and generates the bank payment file. Follow the simulation below — click each button to step through the process.</p>
+        <div class="sap-screen">
+          <div class="sap-titlebar">
+            <span>Automatic Payment Transactions: Parameters — F110</span>
+            <div class="sap-titlebar-icons"><span></span><span></span><span></span></div>
+          </div>
+          <div class="sap-menubar">
+            <div class="sap-menu-item">Edit</div>
+            <div class="sap-menu-item">Goto</div>
+            <div class="sap-menu-item">Settings</div>
+            <div class="sap-menu-item">Environment</div>
+          </div>
+          <div class="sap-toolbar">
+            <div class="sap-tb-btn" id="f110-params" onclick="f110Step(1)">📋 Parameters</div>
+            <div class="sap-tb-btn" id="f110-proposal" onclick="f110Step(2)">📊 Proposal</div>
+            <div class="sap-tb-btn" id="f110-run" onclick="f110Step(3)">▶ Run Payment</div>
+            <div class="sap-tb-btn" id="f110-log" onclick="f110Step(4)">📋 Log</div>
+          </div>
+          <div class="sap-body" id="f110-body">
+            <div style="color:var(--muted);font-size:0.75rem;font-family:'IBM Plex Mono',monospace;padding:1rem;text-align:center;">
+              ← Click a toolbar button to step through the F110 payment run
+            </div>
+          </div>
+        </div>
+        <div id="f110-info" style="display:none;margin-top:0.8rem;border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;line-height:1.6;"></div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);margin-bottom:1rem;">
+          <div class="slide-tag" style="margin-bottom:0.8rem">F110 Key Parameters</div>
+          <div class="flow-steps">
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">RUN</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Run Date & ID</div>
+                <div class="flow-detail">Unique identifier for each payment run. Format: YYYYMMDD + 4-char ID (e.g., 20260317ZZAP). Must be unique per company code. Never reuse a completed run ID.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">PMT</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Posting Date</div>
+                <div class="flow-detail">Date on which payment documents will be posted in SAP. This determines the period the payment hits. Should match actual bank execution date where possible.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">DUE</div><div class="flow-line"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Next Payment Date</div>
+                <div class="flow-detail">F110 selects items due on or before this date. Setting too far ahead risks early payment and cash flow issues. Too close means overdue items are missed.</div>
+              </div>
+            </div>
+            <div class="flow-step" onclick="toggleFlow(this)">
+              <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">CO</div></div>
+              <div class="flow-content">
+                <div class="flow-title">Company Codes & Vendors</div>
+                <div class="flow-detail">Filter by company code, payment method, and vendor range. For global runs, add all company codes paying in same bank. Exclude vendors under dispute using payment block.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(224,48,48,0.05);border:1px solid rgba(224,48,48,0.2);border-radius:var(--radius);padding:1rem;">
+          <div style="font-size:0.78rem;font-weight:700;color:#9b1414;margin-bottom:0.3rem;">🚨 Common F110 Mistakes</div>
+          <div style="font-size:0.75rem;line-height:1.7;color:var(--muted);">
+            • Wrong posting date → wrong accounting period<br>
+            • Forgetting to delete old proposal before re-running<br>
+            • Not checking the exception log for blocked items<br>
+            • Running F110 without IT Basis scheduling in production
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: MATCH THE T-CODE -->
+  <div class="slide" data-slide="7">
+    <div class="slide-tag">Module 4 — T-Code Challenge</div>
+    <h2 class="slide-h2">Match the <span class="hi">T-Code</span> to Its Function</h2>
+    <p class="slide-body" style="margin-bottom:1.2rem">Click a T-Code on the left, then click the matching description on the right. Get all 6 correct to earn bonus XP!</p>
+    <div class="match-game">
+      <div>
+        <div class="match-col-title">SAP Transaction Codes</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="1"><div class="mi-num">1</div> FB60</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="2"><div class="mi-num">2</div> F110</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="3"><div class="mi-num">3</div> MIRO</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="4"><div class="mi-num">4</div> FK10N</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="5"><div class="mi-num">5</div> MRBR</div>
+        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="6"><div class="mi-num">6</div> F-44</div>
+      </div>
+      <div>
+        <div class="match-col-title">Function Descriptions</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="4"><div class="mi-num">A</div> Vendor Balance Display — view all open/cleared items</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="1"><div class="mi-num">B</div> Enter direct vendor invoice (non-PO based)</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="6"><div class="mi-num">C</div> Clear open vendor items manually (payment clearing)</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="2"><div class="mi-num">D</div> Automatic payment program — F110 payment run</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="3"><div class="mi-num">E</div> Enter GR-based invoice (3-way match in MM-IV)</div>
+        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="5"><div class="mi-num">F</div> Release blocked invoices from GR/IR variance block</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;">
+      <button class="match-check-btn" onclick="checkMatch()">Check Matches</button>
+      <button class="match-check-btn" style="background:var(--surface2);color:var(--ink2);" onclick="resetMatch()">Reset</button>
+      <div id="match-score" style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--muted);"></div>
+    </div>
+    <div id="match-feedback" style="display:none;margin-top:0.8rem;font-size:0.83rem;line-height:1.6;border-radius:8px;padding:0.8rem 1rem;"></div>
+  </div>
+
+  <!-- SLIDE 8: GR/IR RECONCILIATION -->
+  <div class="slide" data-slide="8">
+    <div class="slide-tag">Module 5 — Reconciliation</div>
+    <div class="two-col">
+      <div>
+        <h2 class="slide-h2"><span class="hi">GR/IR</span> Clearing & Reconciliation</h2>
+        <p class="slide-body" style="margin-bottom:1rem">The GR/IR account is a temporary clearing account that bridges the Goods Receipt and Invoice Receipt. Understanding it is essential for period-end closing. Click each concept to expand it.</p>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">⚖️</span> What is the GR/IR Account?</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">Account <code>199100</code> (typical). When a Goods Receipt is posted (MIGO), SAP debits the Inventory/Expense account and <strong>credits GR/IR</strong>. When the invoice is posted (MIRO), SAP debits GR/IR and <strong>credits the Vendor AP account</strong>. The two postings offset each other, clearing the GR/IR to zero — ideally.</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">🔄</span> GR Without Invoice (Accrual)</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">If goods are received but invoice hasn't arrived by period-end, GR/IR shows a <strong>credit balance</strong>. At month-end, this is automatically accrued as a liability in financial statements. T-code <code>MR11</code> is used to analyze and maintain GR/IR balance — old items should be reversed or written off after investigation.</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">📋</span> Invoice Without GR (Risk)</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">If a vendor invoice is posted before goods are received, GR/IR shows a <strong>debit balance</strong>. This creates a payment block automatically (assuming GR-based IV is configured). The invoice cannot be paid until the GR is posted. This prevents paying for goods not yet received.</div>
+          </div>
+          <div class="reveal-card" onclick="toggleReveal(this)">
+            <div class="rc-header">
+              <div class="rc-title"><span class="rc-icon">📅</span> Period-End Closing Steps</div>
+              <div class="rc-arrow">▶</div>
+            </div>
+            <div class="rc-body">1. Run <code>MR11</code> to analyze GR/IR open items. 2. Clear items older than 90 days. 3. Post accruals for unmatched GRs via journal entry. 4. Reconcile AP subledger to GL using <code>S_ALR_87012082</code>. 5. Confirm vendor balances agree with vendor statements for key suppliers.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);margin-bottom:1rem;">
+          <div class="slide-tag" style="margin-bottom:0.8rem">GR/IR Accounting Entry</div>
+          <table class="sap-table">
+            <thead><tr><th>Step</th><th>Account</th><th>Debit</th><th>Credit</th></tr></thead>
+            <tbody>
+              <tr><td>1. GR Posted</td><td style="font-family:'IBM Plex Mono',monospace">Inventory 300000</td><td style="color:#155724">$5,000</td><td>—</td></tr>
+              <tr><td>1. GR Posted</td><td style="font-family:'IBM Plex Mono',monospace">GR/IR 199100</td><td>—</td><td style="color:#721c24">$5,000</td></tr>
+              <tr><td colspan="4" style="background:#f5f7fa;font-size:0.62rem;color:var(--muted);padding:0.3rem 0.5rem;">— Invoice arrives —</td></tr>
+              <tr><td>2. IR Posted</td><td style="font-family:'IBM Plex Mono',monospace">GR/IR 199100</td><td style="color:#155724">$5,000</td><td>—</td></tr>
+              <tr><td>2. IR Posted</td><td style="font-family:'IBM Plex Mono',monospace">Vendor AP 160000</td><td>—</td><td style="color:#721c24">$5,000</td></tr>
+              <tr style="background:rgba(10,191,138,0.05)"><td colspan="2" style="font-weight:700;font-size:0.72rem;color:#0a7a59">GR/IR Net Balance</td><td style="font-weight:700;color:#0a7a59">$0</td><td style="font-weight:700;color:#0a7a59">$0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background:rgba(0,112,242,0.05);border:1px solid rgba(0,112,242,0.15);border-radius:var(--radius);padding:1.2rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--sap-navy);margin-bottom:0.4rem;">💡 Key Reports for Reconciliation</div>
+          <div style="font-size:0.75rem;line-height:1.8;color:var(--muted);">
+            <strong style="color:var(--ink2)">FK10N</strong> — Vendor balance display<br>
+            <strong style="color:var(--ink2)">MR11</strong> — GR/IR analysis and maintenance<br>
+            <strong style="color:var(--ink2)">S_ALR_87012082</strong> — AP subledger vs GL reconciliation<br>
+            <strong style="color:var(--ink2)">S_ALR_87012078</strong> — AP aging analysis by vendor<br>
+            <strong style="color:var(--ink2)">FBL1N</strong> — Vendor line item display (all open/cleared)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: SCENARIO QUIZ 2 -->
+  <div class="slide" data-slide="9">
+    <div class="slide-tag">Module 5 — Final Scenario</div>
+    <div class="two-col">
+      <div>
+        <h2 class="slide-h2">Putting It All <span class="hi">Together</span></h2>
+        <div class="scenario-box">
+          <strong>Scenario:</strong> It's month-end. You're reconciling AP and notice the GR/IR account <span class="tcode">199100</span> shows a debit balance of $12,000 from 3 months ago. There's a GR posted in MIGO but no corresponding vendor invoice has been received. The vendor says they never shipped the goods. What is the correct SAP action?
+        </div>
+        <div class="choice-list" id="q2-choices">
+          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+            <div class="choice-label">A</div>
+            Post a manual journal entry to clear the GR/IR account directly to the P&L.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+            <div class="choice-label">B</div>
+            Use F-44 to manually clear the open vendor item in the subledger.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q2',this,'correct')">
+            <div class="choice-label">C</div>
+            Reverse the original Goods Receipt using MIGO (movement type 102), which will automatically clear the GR/IR open item.
+          </div>
+          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+            <div class="choice-label">D</div>
+            Run MR11 to write off the GR/IR balance and close the period.
+          </div>
+        </div>
+        <div class="feedback-box good" id="q2-good">
+          ✅ <strong>Excellent!</strong> Since the vendor confirmed non-shipment, the GR must be reversed using <strong>MIGO (Movement Type 102)</strong> — Return to Vendor. This reversal posts the exact opposite accounting entry, automatically clearing the GR/IR open item and the inventory posting. MR11 is only used when goods were received but invoicing/matching can't be completed — not when the GR itself was erroneous.
+        </div>
+        <div class="feedback-box bad" id="q2-bad">
+          ❌ <strong>Incorrect.</strong> Manual journal entries to GR/IR are generally not recommended and break document flow. F-44 is for AP subledger clearing — not GR/IR. MR11 is an option for old unmatched items, but since the GR itself is the error (goods were never shipped), the correct fix is to <strong>reverse the GR using MIGO movement type 102</strong>.
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow)">
+          <div class="slide-tag" style="margin-bottom:0.8rem">AP Month-End Checklist</div>
+          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.8rem;">Check off each step as you complete your month-end close:</p>
+          <div class="checklist">
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">All invoices for the period entered and posted</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Payment blocks reviewed and released or escalated</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Final F110 payment run executed and validated</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">GR/IR old items cleared via MR11 or MIGO reversal</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">AP subledger reconciled to GL (S_ALR_87012082)</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Aging report reviewed with AP manager sign-off</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Accruals posted for unmatched GRs at period-end</div></div>
+            <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">FI period closed in OB52 after all postings confirmed</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: CERTIFICATE -->
+  <div class="slide" data-slide="10">
+    <div style="max-width:750px;margin:0 auto;text-align:center;">
+      <div class="slide-tag" style="justify-content:center">Course Complete</div>
+      <div class="cert-wrap">
+        <div class="cert-logo">
+          <div class="cert-badge-icon">🎓</div>
+          <div class="sap-logo" style="font-size:0.9rem;padding:0.4rem 1rem;">SAP</div>
+        </div>
+        <div class="cert-title">Certificate of Completion</div>
+        <div class="cert-sub">This is to certify that</div>
+        <div class="cert-name">SAP Finance Learner</div>
+        <div class="cert-course">SAP FI-AP: Accounts Payable Essentials · 2026</div>
+        <div class="cert-skills">
+          <span class="cert-skill">Vendor Master (XK01)</span>
+          <span class="cert-skill">Invoice Posting (FB60 / MIRO)</span>
+          <span class="cert-skill">3-Way Match & Tolerances</span>
+          <span class="cert-skill">F110 Payment Run</span>
+          <span class="cert-skill">GR/IR Reconciliation</span>
+          <span class="cert-skill">AP Month-End Close</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1.5rem;text-align:left;">
+          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
+            <div style="font-size:1.2rem;margin-bottom:0.3rem;">🏦</div>
+            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;">5 Modules</div>
+            <div style="font-size:0.7rem;color:var(--muted);">AP Process → Vendor → Invoice → F110 → Reconciliation</div>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
+            <div style="font-size:1.2rem;margin-bottom:0.3rem;">⌨️</div>
+            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;">10 T-Codes Learned</div>
+            <div style="font-size:0.7rem;color:var(--muted);">FB60, MIRO, F110, FK10N, MRBR, FBL1N + more</div>
+          </div>
+          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
+            <div style="font-size:1.2rem;margin-bottom:0.3rem;">⭐</div>
+            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;"><span id="final-xp">0</span> XP Earned</div>
+            <div style="font-size:0.7rem;color:var(--muted);">From quizzes, checklists & interactive simulations</div>
+          </div>
+        </div>
+        <div class="cert-seal">✅ &nbsp; Verified Completion · SAP FI-AP Module</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER NAV -->
+<div class="footer-nav">
+  <button class="nav-btn" id="prev-btn" onclick="navigate(-1)" disabled>← Previous</button>
+  <div class="breadcrumbs" id="breadcrumbs"></div>
+  <button class="nav-btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+</div>
+
+<script>
+const TOTAL = 10;
+let current = 1;
+let xp = 0;
+
+// ── BREADCRUMBS ──
+const bc = document.getElementById('breadcrumbs');
+for(let i=1;i<=TOTAL;i++){
+  const d=document.createElement('div');
+  d.className='crumb'+(i===1?' active':'');
+  d.title='Slide '+i;
+  d.onclick=()=>goTo(i);
+  bc.appendChild(d);
+}
+
+function updateUI(){
+  document.getElementById('cur-num').textContent=current;
+  document.getElementById('tot-num').textContent=TOTAL;
+  document.getElementById('progress-fill').style.width=(current/TOTAL*100)+'%';
+  document.getElementById('prev-btn').disabled=current===1;
+  const nb=document.getElementById('next-btn');
+  nb.textContent=current===TOTAL?'↺ Restart':'Next →';
+  bc.querySelectorAll('.crumb').forEach((c,i)=>{
+    c.className='crumb';
+    if(i+1<current)c.classList.add('done');
+    if(i+1===current)c.classList.add('active');
+  });
+  if(current===TOTAL) document.getElementById('final-xp').textContent=xp;
+}
+
+function addXP(pts){
+  xp+=pts;
+  document.getElementById('xp-display').textContent=xp;
+}
+
+function goTo(n,dir){
+  const curSlide=document.querySelector('.slide.active');
+  const nextSlide=document.querySelector(`.slide[data-slide="${n}"]`);
+  if(!nextSlide||curSlide===nextSlide)return;
+  const fwd=(dir!==undefined)?dir>0:n>current;
+  curSlide.classList.remove('active');
+  curSlide.classList.add(fwd?'exit-left':'enter-right');
+  nextSlide.style.cssText='display:flex;opacity:0;transform:translateX('+(fwd?'30px':'-30px')+');';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    nextSlide.style.transition='opacity 0.35s ease,transform 0.35s ease';
+    nextSlide.style.opacity='1';
+    nextSlide.style.transform='translateX(0)';
+    nextSlide.classList.add('active');
+    setTimeout(()=>{
+      curSlide.classList.remove('exit-left','enter-right');
+      curSlide.style.display='none';
+      nextSlide.style.transition='';
+    },370);
+  }));
+  current=n;
+  updateUI();
+}
+function navigate(dir){
+  if(current+dir>TOTAL){goTo(1,1);return;}
+  if(current+dir<1)return;
+  goTo(current+dir,dir);
+}
+
+// ── FLOW TOGGLE ──
+function toggleFlow(el){
+  el.classList.toggle('active');
+  addXP(2);
+}
+
+// ── REVEAL CARD ──
+function toggleReveal(el){
+  el.classList.toggle('open');
+  addXP(3);
+}
+
+// ── TABS ──
+function switchTab(tab,panelId){
+  tab.closest('.card,.two-col-wide,section,.slide').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  const wrap=tab.closest('[style],[class*="col"],.sap-screen,.slide').parentElement || document;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ── CHECKLIST ──
+function toggleCheck(el){
+  const wasChecked=el.classList.contains('checked');
+  el.classList.toggle('checked');
+  if(!wasChecked) addXP(2);
+}
+
+// ── VENDOR FIELD TIP ──
+function showFieldTip(text){
+  const tip=document.getElementById('field-tip');
+  if(tip){ tip.style.display='block'; document.getElementById('field-tip-text').textContent=text; addXP(2); }
+}
+function simClick(btn,msg){
+  const el=document.getElementById('sim-msg');
+  if(el){ el.style.display='block'; el.textContent='✓ '+msg; addXP(5); }
+  document.querySelectorAll('.sap-tb-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── KPI TOGGLE ──
+function toggleKPI(el){
+  document.querySelectorAll('.ap-kpi.hs-open').forEach(k=>{if(k!==el)k.classList.remove('hs-open');});
+  el.classList.toggle('hs-open');
+  addXP(4);
+}
+
+// ── F110 SIMULATION ──
+const f110Screens = {
+  1:{
+    html:`<div class="sap-section-title">PARAMETERS</div><div class="sap-grid"><div class="sap-field-group"><div class="sap-label">Run Date</div><input class="sap-field filled" value="03/17/2026"></div><div class="sap-field-group"><div class="sap-label">Identification</div><input class="sap-field filled" value="ZZAP"></div><div class="sap-field-group"><div class="sap-label">Posting Date</div><input class="sap-field filled" value="03/17/2026"></div><div class="sap-field-group"><div class="sap-label">Docs Entered Up To</div><input class="sap-field filled" value="03/17/2026"></div><div class="sap-field-group"><div class="sap-label">Company Code</div><input class="sap-field filled" value="1000"></div><div class="sap-field-group"><div class="sap-label">Pmt Methods</div><input class="sap-field filled" value="C T B"></div></div>`,
+    info:'<strong style="color:var(--sap-blue)">Step 1 — Parameters:</strong> Enter the run date, unique ID, posting date, and company code. The "Next Payment Date" field controls which open items are selected — SAP picks all items due on or before this date.',
+    color:'rgba(0,112,242,0.07)',border:'rgba(0,112,242,0.2)'
+  },
+  2:{
+    html:`<div class="sap-section-title">PAYMENT PROPOSAL — 24 Items Selected</div><table class="sap-table"><thead><tr><th>Vendor</th><th>Name</th><th>Amount (USD)</th><th>Due Date</th><th>Method</th><th>Status</th></tr></thead><tbody><tr><td>100234</td><td>Acme Supply Co</td><td>$12,450.00</td><td>03/15/2026</td><td>C</td><td><span class="sap-status status-posted">Selected</span></td></tr><tr><td>200187</td><td>Global Parts Inc</td><td>$8,200.00</td><td>03/17/2026</td><td>T</td><td><span class="sap-status status-posted">Selected</span></td></tr><tr><td>100891</td><td>Metro Services</td><td>$3,100.00</td><td>03/10/2026</td><td>C</td><td><span class="sap-status status-blocked">Blocked (R)</span></td></tr><tr><td>300045</td><td>Tech Solutions</td><td>$22,800.00</td><td>03/17/2026</td><td>T</td><td><span class="sap-status status-posted">Selected</span></td></tr></tbody></table>`,
+    info:'<strong style="color:var(--sap-amber)">Step 2 — Proposal:</strong> SAP generates a payment proposal listing all selected open items. Review carefully — release any legitimate blocks before proceeding. Items with block code "R" (tolerance variance) must be resolved via MRBR.',
+    color:'rgba(240,165,0,0.06)',border:'rgba(240,165,0,0.2)'
+  },
+  3:{
+    html:`<div class="sap-section-title">PAYMENT RUN — EXECUTING</div><div style="padding:0.5rem 0;"><div style="display:flex;flex-direction:column;gap:0.4rem;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted)"><div style="color:var(--sap-teal)">✓ Parameters read successfully</div><div style="color:var(--sap-teal)">✓ 24 open items selected for payment</div><div style="color:var(--sap-teal)">✓ 1 item excluded (payment block R)</div><div style="color:var(--sap-teal)">✓ Payment documents posted: 23 items</div><div style="color:var(--sap-teal)">✓ Total paid: $189,234.50 USD</div><div style="color:var(--sap-teal)">✓ Check file generated: PMW output</div><div style="color:var(--sap-teal)">✓ ACH file generated: NACHA format</div><div style="color:var(--sap-amber)">⚠ 1 exception: Vendor 100891 — block not released</div></div></div>`,
+    info:'<strong style="color:var(--sap-teal)">Step 3 — Payment Run:</strong> SAP posts all payment documents, clears open items in the vendor subledger, and generates bank output files (check / ACH / wire). The run is now complete — payment files must be transmitted to the bank within the cutoff window.',
+    color:'rgba(10,191,138,0.06)',border:'rgba(10,191,138,0.2)'
+  },
+  4:{
+    html:`<div class="sap-section-title">PAYMENT RUN LOG</div><table class="sap-table"><thead><tr><th>Type</th><th>Message</th><th>Count</th></tr></thead><tbody><tr><td><span class="sap-status status-posted">INFO</span></td><td>Payment run 20260317/ZZAP completed</td><td>—</td></tr><tr><td><span class="sap-status status-posted">INFO</span></td><td>Documents posted successfully</td><td>23</td></tr><tr><td><span class="sap-status status-posted">INFO</span></td><td>Open items cleared in vendor subledger</td><td>23</td></tr><tr><td><span class="sap-status status-open">WARN</span></td><td>Items not paid due to payment block</td><td>1</td></tr><tr><td><span class="sap-status status-posted">INFO</span></td><td>Payment medium file generated (C)</td><td>12</td></tr><tr><td><span class="sap-status status-posted">INFO</span></td><td>Payment medium file generated (T)</td><td>11</td></tr></tbody></table>`,
+    info:'<strong style="color:var(--muted)">Step 4 — Log Review:</strong> Always check the log after every F110 run. Confirm document count matches expectation. Investigate all warnings. Archive the log for audit trail. Transmit payment files to treasury for bank upload before daily cutoff.',
+    color:'rgba(13,27,42,0.04)',border:'rgba(13,27,42,0.1)'
+  }
+};
+function f110Step(n){
+  const s=f110Screens[n];
+  document.getElementById('f110-body').innerHTML=s.html;
+  const info=document.getElementById('f110-info');
+  info.style.display='block';
+  info.style.cssText=`display:block;background:${s.color};border:1px solid ${s.border};border-radius:8px;padding:0.8rem 1rem;font-size:0.78rem;line-height:1.6;color:var(--ink2);margin-top:0.8rem;`;
+  info.innerHTML=s.info;
+  document.querySelectorAll('.sap-tb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(['f110-params','f110-proposal','f110-run','f110-log'][n-1]).classList.add('active');
+  addXP(5);
+}
+
+// ── MATCHING GAME ──
+let selectedTC=null, selectedDesc=null;
+let matchedPairs=0;
+function matchSelect(el, type){
+  if(el.classList.contains('matched-ok')||el.classList.contains('matched-err'))return;
+  if(type==='tc'){
+    document.querySelectorAll('.match-item').forEach(m=>{ if(m!==el&&!m.classList.contains('matched-ok')&&!m.classList.contains('matched-err')) m.classList.remove('selected'); });
+    el.classList.toggle('selected');
+    selectedTC=el.classList.contains('selected')?el:null;
+  } else {
+    selectedDesc=el;
+  }
+  if(selectedTC&&selectedDesc){
+    const id1=selectedTC.getAttribute('data-id');
+    const id2=selectedDesc.getAttribute('data-id');
+    if(id1===id2){
+      selectedTC.classList.remove('selected');
+      selectedTC.classList.add('matched-ok');
+      selectedDesc.classList.add('matched-ok');
+      matchedPairs++;
+      addXP(10);
+    } else {
+      selectedTC.classList.add('matched-err');
+      selectedDesc.classList.add('matched-err');
+      setTimeout(()=>{
+        selectedTC.classList.remove('matched-err','selected');
+        selectedDesc.classList.remove('matched-err');
+      },1000);
+    }
+    selectedTC=null; selectedDesc=null;
+    document.getElementById('match-score').textContent=`${matchedPairs}/6 matched`;
+  }
+}
+function checkMatch(){
+  const fb=document.getElementById('match-feedback');
+  fb.style.display='block';
+  if(matchedPairs===6){
+    fb.style.cssText='display:block;background:rgba(10,191,138,0.08);border:1px solid rgba(10,191,138,0.3);border-radius:8px;padding:0.8rem 1rem;color:#0a7a59;font-size:0.83rem;line-height:1.6;';
+    fb.innerHTML='🎯 <strong>Perfect score!</strong> You correctly matched all 6 SAP t-codes. Bonus XP awarded! These are the most critical transactions in daily AP operations.';
+    addXP(20);
+  } else {
+    fb.style.cssText='display:block;background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);border-radius:8px;padding:0.8rem 1rem;color:#856404;font-size:0.83rem;line-height:1.6;';
+    fb.innerHTML=`⚠️ <strong>${matchedPairs}/6 matched.</strong> Keep going — click the remaining t-codes and descriptions to find the correct pairs!`;
+  }
+}
+function resetMatch(){
+  document.querySelectorAll('.match-item').forEach(m=>{ m.className='match-item'; m.onclick=m.getAttribute('data-id')?()=>matchSelect(m,m.closest('.match-game').children[0].contains(m)?'tc':'desc'):m.onclick; });
+  selectedTC=null; selectedDesc=null; matchedPairs=0;
+  document.getElementById('match-score').textContent='';
+  document.getElementById('match-feedback').style.display='none';
+  // re-attach events
+  document.querySelectorAll('.match-item').forEach(m=>{
+    const col=m.closest('.match-game');
+    if(col){
+      const isLeft=col.children[0].contains(m);
+      m.onclick=()=>matchSelect(m,isLeft?'tc':'desc');
+    }
+  });
+}
+
+// ── QUIZ ──
+function answerQ(qid,btn,result){
+  const container=document.getElementById(qid+'-choices');
+  if(container.querySelector('.locked'))return;
+  container.querySelectorAll('.choice-btn').forEach(b=>b.classList.add('locked'));
+  btn.classList.add(result==='correct'?'correct':'wrong');
+  const good=document.getElementById(qid+'-good');
+  const bad=document.getElementById(qid+'-bad');
+  if(result==='correct'){ good.classList.add('show'); addXP(15); }
+  else {
+    bad.classList.add('show');
+    container.querySelectorAll('.choice-btn').forEach(b=>{ if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'correct'")) b.classList.add('correct'); });
+  }
+}
+
+updateUI();
+</script>
+</body>
+</html>
