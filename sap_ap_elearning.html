@@ -118,7 +118,7 @@ body {
   padding: 2.5rem 3.5rem;
   display: none;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   overflow-y: auto;
   opacity: 0;
   transform: translateX(30px);
@@ -127,6 +127,8 @@ body {
 .slide.active { display: flex; opacity: 1; transform: translateX(0); }
 .slide.exit-left { display: flex; opacity: 0; transform: translateX(-30px); }
 .slide.enter-right { display: flex; opacity: 0; transform: translateX(30px); }
+/* For slides with little content — keep vertically centred */
+.slide.v-center { justify-content: center; }
 
 /* ── FOOTER ── */
 .footer-nav {
@@ -146,9 +148,9 @@ body {
   font-size: 0.8rem;
   letter-spacing: 0.04em;
   padding: 0.6rem 1.5rem;
-  border: 1.5px solid var(--border);
-  background: var(--white);
-  color: var(--ink2);
+  border: 1.5px solid var(--sap-blue);
+  background: var(--sap-blue);
+  color: #fff;
   cursor: pointer;
   border-radius: 6px;
   display: flex;
@@ -157,9 +159,8 @@ body {
   transition: all 0.2s;
 }
 .nav-btn:hover:not(:disabled) {
-  border-color: var(--sap-blue);
-  color: var(--sap-blue);
-  background: rgba(0,112,242,0.04);
+  background: #0057c2;
+  border-color: #0057c2;
 }
 .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .nav-btn.primary {
@@ -169,17 +170,8 @@ body {
 }
 .nav-btn.primary:hover { background: #0057c2; }
 
-.breadcrumbs { display: flex; gap: 5px; align-items: center; }
-.crumb {
-  width: 28px; height: 5px;
-  border-radius: 3px;
-  background: var(--surface2);
-  cursor: pointer;
-  transition: all 0.25s;
-}
-.crumb.done { background: var(--sap-teal); }
-.crumb.active { background: var(--sap-blue); width: 36px; }
-.crumb:hover { opacity: 0.7; }
+.breadcrumbs { display: none; }
+.crumb { display: none; }
 
 /* ── TYPOGRAPHY ── */
 .slide-tag {
@@ -781,6 +773,160 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #c0cdd8; border-radius: 2px; }
 
+/* ── HOW TO NAVIGATE SLIDE ── */
+.nav-guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.nav-guide-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.nav-guide-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,70,180,0.12); }
+.nav-guide-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: rgba(0,112,242,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  color: var(--sap-blue);
+}
+.nav-guide-title { font-weight: 700; font-size: 0.88rem; color: var(--ink2); margin-bottom: 0.25rem; }
+.nav-guide-desc { font-size: 0.75rem; line-height: 1.55; color: var(--muted); }
+.nav-tip-bar {
+  margin-top: 1rem;
+  background: rgba(10,191,138,0.07);
+  border-left: 3px solid var(--sap-teal);
+  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--ink2);
+  line-height: 1.6;
+}
+
+/* ── INTERACTION HINT ── */
+.interaction-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(0,112,242,0.07);
+  border: 1px solid rgba(0,112,242,0.18);
+  border-radius: 100px;
+  padding: 0.28rem 0.85rem;
+  font-size: 0.72rem;
+  color: var(--sap-blue);
+  font-weight: 500;
+  margin-bottom: 0.9rem;
+  letter-spacing: 0.01em;
+}
+.interaction-hint .hint-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sap-blue);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+.interaction-hint.done {
+  background: rgba(10,191,138,0.07);
+  border-color: rgba(10,191,138,0.3);
+  color: #0a7a59;
+}
+.interaction-hint.done .hint-dot {
+  background: var(--sap-teal);
+  animation: none;
+}
+
+/* ── NEXT LOCKED STATE ── */
+.nav-btn.locked-hint {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* ── COMPLETION SLIDE ── */
+.completion-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+  box-shadow: 0 8px 40px rgba(0,70,180,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.completion-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--sap-blue), var(--sap-teal), var(--sap-amber));
+}
+.completion-icon { font-size: 3.5rem; margin-bottom: 0.8rem; display: block; }
+.completion-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  color: var(--sap-navy);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+.completion-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+.completion-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.completion-stat {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.completion-stat-icon { font-size: 1.2rem; margin-bottom: 0.3rem; }
+.completion-stat-num { font-weight: 800; font-size: 0.9rem; color: var(--ink2); margin-bottom: 0.2rem; }
+.completion-stat-label { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+.completion-skills { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+.completion-skill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.7rem;
+  border-radius: 100px;
+  border: 1px solid var(--sap-blue);
+  color: var(--sap-blue);
+  background: rgba(0,112,242,0.04);
+}
+.completion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--sap-navy), var(--sap-blue));
+  color: #fff;
+  border-radius: 100px;
+  padding: 0.6rem 1.8rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
 /* ── HOTSPOT SIM ── */
 .ap-dashboard {
   background: #f5f7fa;
@@ -887,7 +1033,7 @@ body {
     <div class="xp-display">
       <div class="xp-badge">⭐ <span id="xp-display">0</span> XP</div>
     </div>
-    <div class="slide-counter">Slide <span id="cur-num">1</span> / <span id="tot-num">10</span></div>
+    <div class="slide-counter">Slide <span id="cur-num">1</span> / <span id="tot-num">11</span></div>
   </div>
 </div>
 
@@ -900,7 +1046,7 @@ body {
 <div class="slides-wrapper">
 
   <!-- SLIDE 1: WELCOME -->
-  <div class="slide active" data-slide="1">
+  <div class="slide v-center active" data-slide="1" data-interactive="s1-obj" data-required="5">
     <div class="two-col">
       <div>
         <div class="slide-tag">Course Introduction</div>
@@ -912,7 +1058,6 @@ body {
           <span class="pill">SAP FI-AP</span>
           <span class="pill">ECC & S/4HANA</span>
           <span class="pill">~30 min</span>
-          <span class="pill">Interactive Simulations</span>
         </div>
         <div class="info-strip">
           <div class="info-chip"><span class="dot" style="background:var(--sap-blue)"></span> Vendor Master</div>
@@ -925,35 +1070,35 @@ body {
         <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow)">
           <div class="slide-tag" style="margin-bottom:1rem">Learning Objectives</div>
           <div class="flow-steps" id="obj-flow">
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s1-obj');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot">01</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Navigate SAP FI-AP module</div>
                 <div class="flow-detail">Understand the structure of the FI module, key t-codes, and how AP integrates with MM (Materials Management) and FI-GL (General Ledger).</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s1-obj');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot">02</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Create and manage Vendor Masters</div>
                 <div class="flow-detail">Set up vendor master records with correct account groups, payment terms, bank details, and reconciliation accounts using t-code XK01 / FK01.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s1-obj');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot">03</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Post and manage AP invoices</div>
                 <div class="flow-detail">Enter vendor invoices (FB60), park documents, perform 3-way matching, and handle credit memos using standard SAP document flow.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s1-obj');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot">04</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Execute the F110 Payment Run</div>
                 <div class="flow-detail">Configure and execute automatic payment programs, manage payment proposals, and understand payment medium workbench output.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s1-obj');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot">05</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Reconcile and report AP balances</div>
@@ -961,55 +1106,112 @@ body {
               </div>
             </div>
           </div>
+          <div style="margin-top:0.8rem;padding:0.55rem 0.9rem;background:rgba(0,112,242,0.05);border:1px solid rgba(0,112,242,0.15);border-radius:7px;font-size:0.72rem;color:var(--sap-blue);display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-size:0.85rem;">👆</span> <span>Click each objective to expand and explore the details</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="slide v-center" data-slide="2">
+    <div style="max-width:860px;margin:0 auto;width:100%;">
+      <div class="slide-tag">Getting Started</div>
+      <h2 class="slide-h2">How to <span class="hi">Navigate</span> This Course</h2>
+      <p class="slide-body" style="margin-bottom:0;">Familiarise yourself with the course controls before you begin. You'll use all of these throughout the lessons.</p>
+      <div class="nav-guide-grid">
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon">◀▶</div>
+          <div>
+            <div class="nav-guide-title">Previous & Next</div>
+            <div class="nav-guide-desc">Use the <strong>← Previous</strong> and <strong>Next →</strong> buttons at the bottom of every slide to move through the course.</div>
+          </div>
+        </div>
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon" style="background:rgba(0,112,242,0.1);color:var(--sap-blue);">🔒</div>
+          <div>
+            <div class="nav-guide-title">Locked Next Button</div>
+            <div class="nav-guide-desc">On some slides the <strong>Next</strong> button is locked. Interact with all the clickable elements on the slide to unlock it.</div>
+          </div>
+        </div>
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon" style="background:rgba(10,191,138,0.1);color:var(--sap-teal);">▬</div>
+          <div>
+            <div class="nav-guide-title">Progress Bar</div>
+            <div class="nav-guide-desc">The blue-green bar at the top tracks your progress automatically as you advance through slides.</div>
+          </div>
+        </div>
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon" style="background:rgba(124,58,237,0.1);color:var(--sap-purple);">12</div>
+          <div>
+            <div class="nav-guide-title">Slide Counter</div>
+            <div class="nav-guide-desc">The counter in the top-right shows your current position — e.g. Slide <strong>02 / 11</strong>.</div>
+          </div>
+        </div>
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon" style="background:rgba(240,165,0,0.1);color:var(--sap-amber);">👆</div>
+          <div>
+            <div class="nav-guide-title">Interactive Elements</div>
+            <div class="nav-guide-desc">Click tabs, cards, flow steps, KPI tiles, and simulator buttons to reveal content and earn XP.</div>
+          </div>
+        </div>
+        <div class="nav-guide-card">
+          <div class="nav-guide-icon" style="background:rgba(10,191,138,0.1);color:var(--sap-teal);">✓</div>
+          <div>
+            <div class="nav-guide-title">Knowledge Checks</div>
+            <div class="nav-guide-desc">Answer scenario questions at the end of each module. The <strong>Next</strong> button unlocks once you've explored all interactive elements.</div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-tip-bar">
+        💡 <strong>Tip:</strong> On slides with interactive elements, the <strong>Next</strong> button is locked until you've explored all clickable items. The instruction inside each card or box tells you exactly what to click. Once complete, the Next button activates automatically.
+      </div>
+    </div>
+  </div>
 
-  <!-- SLIDE 2: AP PROCESS FLOW -->
-  <div class="slide" data-slide="2">
+  <!-- SLIDE 3: AP PROCESS FLOW -->
+  <div class="slide" data-slide="3" data-interactive="s3" data-required="6">
     <div class="slide-tag">Module 1 — AP Process Overview</div>
     <div class="two-col-wide">
       <div>
         <h2 class="slide-h2">The <span class="hi">Procure-to-Pay</span> Cycle</h2>
         <p class="slide-body" style="margin-bottom:1.2rem">SAP AP sits at the end of the Procure-to-Pay (P2P) cycle. Click each step to understand what happens in SAP at each stage.</p>
         <div class="flow-steps">
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">1</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Purchase Requisition <span class="flow-tcode">ME51N</span></div>
               <div class="flow-detail">Internal request to procure goods/services. Approved by relevant cost center manager. Generated in SAP MM module — AP receives downstream impact.</div>
             </div>
           </div>
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">2</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Purchase Order <span class="flow-tcode">ME21N</span></div>
               <div class="flow-detail">Legal commitment to vendor. Contains quantity, price, delivery date, payment terms, and GL account assignment. This drives the expected invoice value in AP.</div>
             </div>
           </div>
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">3</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Goods Receipt <span class="flow-tcode">MIGO</span></div>
               <div class="flow-detail">Confirms physical delivery of goods. SAP posts a GR/IR clearing account debit. This creates the "open item" that AP invoice matching clears against.</div>
             </div>
           </div>
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">4</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Invoice Verification <span class="flow-tcode">MIRO / FB60</span></div>
               <div class="flow-detail">AP clerk enters vendor invoice. SAP performs 3-way match (PO + GR + Invoice). Tolerances apply — variances outside limits trigger a payment block automatically.</div>
             </div>
           </div>
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">5</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Payment Run <span class="flow-tcode">F110</span></div>
               <div class="flow-detail">Automatic payment program selects open items due for payment based on baseline date, payment terms, and cash discount rules. Generates payment file for bank.</div>
             </div>
           </div>
-          <div class="flow-step" onclick="toggleFlow(this)">
+          <div class="flow-step" onclick="trackClick(this,'s3');toggleFlow(this)">
             <div class="flow-dot-col"><div class="flow-dot">6</div><div class="flow-line"></div></div>
             <div class="flow-content">
               <div class="flow-title">Bank Reconciliation <span class="flow-tcode">FF67 / FEBAN</span></div>
@@ -1046,8 +1248,8 @@ body {
     </div>
   </div>
 
-  <!-- SLIDE 3: VENDOR MASTER SIMULATION -->
-  <div class="slide" data-slide="3">
+  <!-- SLIDE 4: VENDOR MASTER SIMULATION -->
+  <div class="slide" data-slide="4" data-interactive="s4" data-required="2">
     <div class="slide-tag">Module 2 — Vendor Master · T-Code: XK01</div>
     <div class="two-col-wide">
       <div>
@@ -1122,8 +1324,8 @@ body {
           <div class="slide-tag" style="margin-bottom:0.8rem">Vendor Master Tabs</div>
           <div class="tab-bar">
             <div class="tab active" onclick="switchTab(this,'tab-gen')">General</div>
-            <div class="tab" onclick="switchTab(this,'tab-co')">Company</div>
-            <div class="tab" onclick="switchTab(this,'tab-pur')">Purchasing</div>
+            <div class="tab" onclick="trackClick(this,'s4');switchTab(this,'tab-co')">Company</div>
+            <div class="tab" onclick="trackClick(this,'s4');switchTab(this,'tab-pur')">Purchasing</div>
           </div>
           <div class="tab-panel active" id="tab-gen">
             <div class="checklist">
@@ -1152,41 +1354,44 @@ body {
               <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">GR-based invoice verification flag</div></div>
             </div>
           </div>
+          <div style="margin-top:0.9rem;padding:0.55rem 0.9rem;background:rgba(0,112,242,0.05);border:1px solid rgba(0,112,242,0.15);border-radius:7px;font-size:0.72rem;color:var(--sap-blue);display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-size:0.85rem;">👆</span> <span>Click each tab to explore</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SLIDE 4: INVOICE ENTRY QUIZ -->
-  <div class="slide" data-slide="4">
+  <!-- SLIDE 5: INVOICE ENTRY QUIZ -->
+  <div class="slide" data-slide="5" data-interactive="s5" data-required="5">
     <div class="slide-tag">Module 3 — Invoice Entry · Knowledge Check</div>
     <div class="two-col">
       <div>
         <h2 class="slide-h2">Posting an <span class="hi">AP Invoice</span></h2>
         <p class="slide-body" style="margin-bottom:1rem">In SAP FI-AP, the t-code <strong>FB60</strong> is used for direct vendor invoice entry (non-PO invoices). <strong>MIRO</strong> is used for PO-based 3-way match invoices. Click each element to learn more.</p>
         <div style="display:flex;flex-direction:column;gap:0.5rem;">
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s5');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">📄</span> What is a 3-Way Match?</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">SAP automatically compares: <strong>Purchase Order</strong> (what was ordered) + <strong>Goods Receipt</strong> (what was delivered) + <strong>Vendor Invoice</strong> (what is billed). All three must match within configured tolerance limits. If they don't, SAP sets a <code>payment block (R)</code> on the document automatically.</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s5');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">⚠️</span> Payment Block Codes</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">SAP uses single-character codes: <code>R</code> = Invoice verification block (tolerance exceeded), <code>A</code> = Free for payment, <code>B</code> = Manual block set by AP, <code>Z</code> = Block from payment proposal. Release blocks using <code>MRBR</code> (GR/IR block release) or <code>FB02</code> (manual document change).</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s5');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">🔢</span> Baseline Date Logic</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">Baseline date determines when payment is due. SAP calculates: <code>Baseline Date + Payment Term Days = Due Date</code>. The baseline date can be set to posting date, invoice date, or document date — controlled by the payment terms configuration in <code>OBB8</code>. Getting this wrong causes early or late payments.</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s5');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">💳</span> Credit Memos (T-Code: FB65)</div>
               <div class="rc-arrow">▶</div>
@@ -1200,21 +1405,21 @@ body {
           <strong>Scenario:</strong> An AP clerk posts a vendor invoice using <span class="tcode">MIRO</span> for USD 5,200. The matching PO shows USD 5,000 and the GR confirms full delivery. The company's invoice tolerance is ±3%. What will SAP do?
         </div>
         <div class="choice-list" id="q1-choices">
-          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s5');answerQ('q1',this,'wrong')">
             <div class="choice-label">A</div>
             Post the invoice and pay USD 5,200 in the next F110 run automatically.
           </div>
-          <div class="choice-btn" onclick="answerQ('q1',this,'correct')">
+          <div class="choice-btn" onclick="trackClick(this,'s5');answerQ('q1',this,'correct')">
             <div class="choice-label">B</div>
             Post the invoice but set payment block code <strong>R</strong> — the variance (4%) exceeds tolerance.
           </div>
-          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s5');answerQ('q1',this,'wrong')">
             <div class="choice-label">C</div>
             Reject the invoice and send an automatic vendor notification.
           </div>
-          <div class="choice-btn" onclick="answerQ('q1',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s5');answerQ('q1',this,'wrong')">
             <div class="choice-label">D</div>
-            Post at USD 5,000 and write off the USD 200 variance to a P&L account.
+            Post at USD 5,000 and write off the USD 200 variance to a P&amp;L account.
           </div>
         </div>
         <div class="feedback-box good" id="q1-good">
@@ -1227,8 +1432,8 @@ body {
     </div>
   </div>
 
-  <!-- SLIDE 5: AP DASHBOARD HOTSPOT -->
-  <div class="slide" data-slide="5">
+  <!-- SLIDE 6: AP DASHBOARD HOTSPOT -->
+  <div class="slide" data-slide="6" data-interactive="s6" data-required="6">
     <div class="slide-tag">Module 3 — AP Aging & Reporting</div>
     <div class="two-col-wide">
       <div>
@@ -1240,32 +1445,32 @@ body {
             <span style="color:rgba(255,255,255,0.5);font-size:0.62rem;">Company Code: 1000 | Currency: USD</span>
           </div>
           <div class="ap-dash-body">
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">$2.4M</div>
               <div class="kpi-label">Open AP Balance</div>
               <div class="kpi-tooltip"><strong>T-Code: FK10N</strong><br>Total outstanding invoices not yet paid. High balance may indicate bottlenecks in approval or payment runs. Review aging buckets to identify overdue items.</div>
             </div>
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">$183K</div>
               <div class="kpi-label">Overdue &gt;30 Days</div>
               <div class="kpi-tooltip"><strong>T-Code: S_ALR_87012078</strong><br>Invoices past due date by 30+ days. Overdue AP risks vendor relationship damage and late payment penalties. Prioritize in next F110 run.</div>
             </div>
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">14</div>
               <div class="kpi-label">Blocked Invoices</div>
               <div class="kpi-tooltip"><strong>T-Code: MRBR / MIR6</strong><br>Invoices with payment block R, B, or Z. Each blocked invoice needs investigation — price variance, missing GR, or manual hold. Target: resolve within 48 hrs.</div>
             </div>
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">97.2%</div>
               <div class="kpi-label">On-Time Payment Rate</div>
               <div class="kpi-tooltip"><strong>T-Code: F110 Log</strong><br>% of invoices paid on or before due date. Below 95% signals process issues. Above 99% is world-class. Track by vendor category and company code.</div>
             </div>
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">$4,200</div>
               <div class="kpi-label">Discounts Captured</div>
               <div class="kpi-tooltip"><strong>T-Code: S_ALR_87012103</strong><br>Cash discounts earned by paying within early payment discount window (e.g., 2/10 Net 30). Uncaptured discounts are lost savings — review payment term optimization.</div>
             </div>
-            <div class="ap-kpi" onclick="toggleKPI(this)">
+            <div class="ap-kpi" onclick="trackClick(this,'s6');toggleKPI(this)">
               <div class="kpi-num">3</div>
               <div class="kpi-label">Duplicate Suspects</div>
               <div class="kpi-tooltip"><strong>T-Code: FB60 / RFAP0001</strong><br>Potential duplicate invoices flagged by SAP duplicate invoice check. Always verify before payment — same vendor, same amount, same reference number = likely duplicate.</div>
@@ -1298,7 +1503,8 @@ body {
   </div>
 
   <!-- SLIDE 6: F110 PAYMENT RUN SIMULATION -->
-  <div class="slide" data-slide="6">
+  <!-- SLIDE 7: F110 PAYMENT RUN SIMULATION -->
+  <div class="slide" data-slide="7" data-interactive="s7" data-required="8">
     <div class="slide-tag">Module 4 — F110 Payment Run</div>
     <div class="two-col-wide">
       <div>
@@ -1316,10 +1522,10 @@ body {
             <div class="sap-menu-item">Environment</div>
           </div>
           <div class="sap-toolbar">
-            <div class="sap-tb-btn" id="f110-params" onclick="f110Step(1)">📋 Parameters</div>
-            <div class="sap-tb-btn" id="f110-proposal" onclick="f110Step(2)">📊 Proposal</div>
-            <div class="sap-tb-btn" id="f110-run" onclick="f110Step(3)">▶ Run Payment</div>
-            <div class="sap-tb-btn" id="f110-log" onclick="f110Step(4)">📋 Log</div>
+            <div class="sap-tb-btn" id="f110-params" onclick="trackClick(this,'s7');f110Step(1)">📋 Parameters</div>
+            <div class="sap-tb-btn" id="f110-proposal" onclick="trackClick(this,'s7');f110Step(2)">📊 Proposal</div>
+            <div class="sap-tb-btn" id="f110-run" onclick="trackClick(this,'s7');f110Step(3)">▶ Run Payment</div>
+            <div class="sap-tb-btn" id="f110-log" onclick="trackClick(this,'s7');f110Step(4)">📋 Log</div>
           </div>
           <div class="sap-body" id="f110-body">
             <div style="color:var(--muted);font-size:0.75rem;font-family:'IBM Plex Mono',monospace;padding:1rem;text-align:center;">
@@ -1333,34 +1539,37 @@ body {
         <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);margin-bottom:1rem;">
           <div class="slide-tag" style="margin-bottom:0.8rem">F110 Key Parameters</div>
           <div class="flow-steps">
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s7');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">RUN</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Run Date & ID</div>
                 <div class="flow-detail">Unique identifier for each payment run. Format: YYYYMMDD + 4-char ID (e.g., 20260317ZZAP). Must be unique per company code. Never reuse a completed run ID.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s7');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">PMT</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Posting Date</div>
                 <div class="flow-detail">Date on which payment documents will be posted in SAP. This determines the period the payment hits. Should match actual bank execution date where possible.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s7');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">DUE</div><div class="flow-line"></div></div>
               <div class="flow-content">
                 <div class="flow-title">Next Payment Date</div>
                 <div class="flow-detail">F110 selects items due on or before this date. Setting too far ahead risks early payment and cash flow issues. Too close means overdue items are missed.</div>
               </div>
             </div>
-            <div class="flow-step" onclick="toggleFlow(this)">
+            <div class="flow-step" onclick="trackClick(this,'s7');toggleFlow(this)">
               <div class="flow-dot-col"><div class="flow-dot" style="font-size:0.55rem">CO</div></div>
               <div class="flow-content">
                 <div class="flow-title">Company Codes & Vendors</div>
                 <div class="flow-detail">Filter by company code, payment method, and vendor range. For global runs, add all company codes paying in same bank. Exclude vendors under dispute using payment block.</div>
               </div>
             </div>
+          </div>
+          <div style="margin-top:0.9rem;padding:0.55rem 0.9rem;background:rgba(0,112,242,0.05);border:1px solid rgba(0,112,242,0.15);border-radius:7px;font-size:0.72rem;color:var(--sap-blue);display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-size:0.85rem;">👆</span> <span>Click each parameter card to learn what it controls in the F110 run</span>
           </div>
         </div>
         <div style="background:rgba(224,48,48,0.05);border:1px solid rgba(224,48,48,0.2);border-radius:var(--radius);padding:1rem;">
@@ -1376,69 +1585,69 @@ body {
     </div>
   </div>
 
-  <!-- SLIDE 7: MATCH THE T-CODE -->
-  <div class="slide" data-slide="7">
+  <!-- SLIDE 8: MATCH THE T-CODE -->
+  <div class="slide" data-slide="8">
     <div class="slide-tag">Module 4 — T-Code Challenge</div>
     <h2 class="slide-h2">Match the <span class="hi">T-Code</span> to Its Function</h2>
     <p class="slide-body" style="margin-bottom:1.2rem">Click a T-Code on the left, then click the matching description on the right. Get all 6 correct to earn bonus XP!</p>
     <div class="match-game">
       <div>
         <div class="match-col-title">SAP Transaction Codes</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="1"><div class="mi-num">1</div> FB60</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="2"><div class="mi-num">2</div> F110</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="3"><div class="mi-num">3</div> MIRO</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="4"><div class="mi-num">4</div> FK10N</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="5"><div class="mi-num">5</div> MRBR</div>
-        <div class="match-item" onclick="matchSelect(this,'tc')" data-id="6"><div class="mi-num">6</div> F-44</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="1"><div class="mi-num">1</div> FB60</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="2"><div class="mi-num">2</div> F110</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="3"><div class="mi-num">3</div> MIRO</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="4"><div class="mi-num">4</div> FK10N</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="5"><div class="mi-num">5</div> MRBR</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'tc')" data-id="6"><div class="mi-num">6</div> F-44</div>
       </div>
       <div>
         <div class="match-col-title">Function Descriptions</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="4"><div class="mi-num">A</div> Vendor Balance Display — view all open/cleared items</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="1"><div class="mi-num">B</div> Enter direct vendor invoice (non-PO based)</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="6"><div class="mi-num">C</div> Clear open vendor items manually (payment clearing)</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="2"><div class="mi-num">D</div> Automatic payment program — F110 payment run</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="3"><div class="mi-num">E</div> Enter GR-based invoice (3-way match in MM-IV)</div>
-        <div class="match-item" onclick="matchSelect(this,'desc')" data-id="5"><div class="mi-num">F</div> Release blocked invoices from GR/IR variance block</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="4"><div class="mi-num">A</div> Vendor Balance Display — view all open/cleared items</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="1"><div class="mi-num">B</div> Enter direct vendor invoice (non-PO based)</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="6"><div class="mi-num">C</div> Clear open vendor items manually (payment clearing)</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="2"><div class="mi-num">D</div> Automatic payment program — F110 payment run</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="3"><div class="mi-num">E</div> Enter GR-based invoice (3-way match in MM-IV)</div>
+        <div class="match-item" onclick="trackClick(this,'s8');matchSelect(this,'desc')" data-id="5"><div class="mi-num">F</div> Release blocked invoices from GR/IR variance block</div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;">
-      <button class="match-check-btn" onclick="checkMatch()">Check Matches</button>
+      <button class="match-check-btn" onclick="trackClick(this,'s8');checkMatch()">Check Matches</button>
       <button class="match-check-btn" style="background:var(--surface2);color:var(--ink2);" onclick="resetMatch()">Reset</button>
       <div id="match-score" style="font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--muted);"></div>
     </div>
     <div id="match-feedback" style="display:none;margin-top:0.8rem;font-size:0.83rem;line-height:1.6;border-radius:8px;padding:0.8rem 1rem;"></div>
   </div>
 
-  <!-- SLIDE 8: GR/IR RECONCILIATION -->
-  <div class="slide" data-slide="8">
+  <!-- SLIDE 9: GR/IR RECONCILIATION -->
+  <div class="slide" data-slide="9" data-interactive="s9" data-required="4">
     <div class="slide-tag">Module 5 — Reconciliation</div>
     <div class="two-col">
       <div>
         <h2 class="slide-h2"><span class="hi">GR/IR</span> Clearing & Reconciliation</h2>
         <p class="slide-body" style="margin-bottom:1rem">The GR/IR account is a temporary clearing account that bridges the Goods Receipt and Invoice Receipt. Understanding it is essential for period-end closing. Click each concept to expand it.</p>
         <div style="display:flex;flex-direction:column;gap:0.5rem;">
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s9');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">⚖️</span> What is the GR/IR Account?</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">Account <code>199100</code> (typical). When a Goods Receipt is posted (MIGO), SAP debits the Inventory/Expense account and <strong>credits GR/IR</strong>. When the invoice is posted (MIRO), SAP debits GR/IR and <strong>credits the Vendor AP account</strong>. The two postings offset each other, clearing the GR/IR to zero — ideally.</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s9');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">🔄</span> GR Without Invoice (Accrual)</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">If goods are received but invoice hasn't arrived by period-end, GR/IR shows a <strong>credit balance</strong>. At month-end, this is automatically accrued as a liability in financial statements. T-code <code>MR11</code> is used to analyze and maintain GR/IR balance — old items should be reversed or written off after investigation.</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s9');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">📋</span> Invoice Without GR (Risk)</div>
               <div class="rc-arrow">▶</div>
             </div>
             <div class="rc-body">If a vendor invoice is posted before goods are received, GR/IR shows a <strong>debit balance</strong>. This creates a payment block automatically (assuming GR-based IV is configured). The invoice cannot be paid until the GR is posted. This prevents paying for goods not yet received.</div>
           </div>
-          <div class="reveal-card" onclick="toggleReveal(this)">
+          <div class="reveal-card" onclick="trackClick(this,'s9');toggleReveal(this)">
             <div class="rc-header">
               <div class="rc-title"><span class="rc-icon">📅</span> Period-End Closing Steps</div>
               <div class="rc-arrow">▶</div>
@@ -1476,8 +1685,8 @@ body {
     </div>
   </div>
 
-  <!-- SLIDE 9: SCENARIO QUIZ 2 -->
-  <div class="slide" data-slide="9">
+  <!-- SLIDE 10: SCENARIO QUIZ 2 -->
+  <div class="slide" data-slide="10" data-interactive="s10" data-required="1">
     <div class="slide-tag">Module 5 — Final Scenario</div>
     <div class="two-col">
       <div>
@@ -1486,19 +1695,19 @@ body {
           <strong>Scenario:</strong> It's month-end. You're reconciling AP and notice the GR/IR account <span class="tcode">199100</span> shows a debit balance of $12,000 from 3 months ago. There's a GR posted in MIGO but no corresponding vendor invoice has been received. The vendor says they never shipped the goods. What is the correct SAP action?
         </div>
         <div class="choice-list" id="q2-choices">
-          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s10');answerQ('q2',this,'wrong')">
             <div class="choice-label">A</div>
-            Post a manual journal entry to clear the GR/IR account directly to the P&L.
+            Post a manual journal entry to clear the GR/IR account directly to the P&amp;L.
           </div>
-          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s10');answerQ('q2',this,'wrong')">
             <div class="choice-label">B</div>
             Use F-44 to manually clear the open vendor item in the subledger.
           </div>
-          <div class="choice-btn" onclick="answerQ('q2',this,'correct')">
+          <div class="choice-btn" onclick="trackClick(this,'s10');answerQ('q2',this,'correct')">
             <div class="choice-label">C</div>
             Reverse the original Goods Receipt using MIGO (movement type 102), which will automatically clear the GR/IR open item.
           </div>
-          <div class="choice-btn" onclick="answerQ('q2',this,'wrong')">
+          <div class="choice-btn" onclick="trackClick(this,'s10');answerQ('q2',this,'wrong')">
             <div class="choice-label">D</div>
             Run MR11 to write off the GR/IR balance and close the period.
           </div>
@@ -1529,45 +1738,40 @@ body {
     </div>
   </div>
 
-  <!-- SLIDE 10: CERTIFICATE -->
-  <div class="slide" data-slide="10">
-    <div style="max-width:750px;margin:0 auto;text-align:center;">
+  <!-- SLIDE 11: COURSE COMPLETION -->
+  <div class="slide v-center" data-slide="11">
+    <div style="max-width:680px;margin:0 auto;text-align:center;">
       <div class="slide-tag" style="justify-content:center">Course Complete</div>
-      <div class="cert-wrap">
-        <div class="cert-logo">
-          <div class="cert-badge-icon">🎓</div>
-          <div class="sap-logo" style="font-size:0.9rem;padding:0.4rem 1rem;">SAP</div>
+      <div class="completion-wrap">
+        <span class="completion-icon">🏆</span>
+        <div class="completion-title">Course Complete!</div>
+        <p class="completion-sub">You've finished <strong>SAP FI-AP: Accounts Payable Essentials</strong>.<br>You now have the practical knowledge to work confidently in SAP AP.</p>
+        <div class="completion-skills">
+          <span class="completion-skill">Vendor Master (XK01)</span>
+          <span class="completion-skill">Invoice Posting (FB60 / MIRO)</span>
+          <span class="completion-skill">3-Way Match & Tolerances</span>
+          <span class="completion-skill">F110 Payment Run</span>
+          <span class="completion-skill">GR/IR Reconciliation</span>
+          <span class="completion-skill">AP Month-End Close</span>
         </div>
-        <div class="cert-title">Certificate of Completion</div>
-        <div class="cert-sub">This is to certify that</div>
-        <div class="cert-name">SAP Finance Learner</div>
-        <div class="cert-course">SAP FI-AP: Accounts Payable Essentials · 2026</div>
-        <div class="cert-skills">
-          <span class="cert-skill">Vendor Master (XK01)</span>
-          <span class="cert-skill">Invoice Posting (FB60 / MIRO)</span>
-          <span class="cert-skill">3-Way Match & Tolerances</span>
-          <span class="cert-skill">F110 Payment Run</span>
-          <span class="cert-skill">GR/IR Reconciliation</span>
-          <span class="cert-skill">AP Month-End Close</span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1.5rem;text-align:left;">
-          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
-            <div style="font-size:1.2rem;margin-bottom:0.3rem;">🏦</div>
-            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;">5 Modules</div>
-            <div style="font-size:0.7rem;color:var(--muted);">AP Process → Vendor → Invoice → F110 → Reconciliation</div>
+        <div class="completion-stats">
+          <div class="completion-stat">
+            <div class="completion-stat-icon">📚</div>
+            <div class="completion-stat-num">5 Modules</div>
+            <div class="completion-stat-label">AP Process → Vendor → Invoice → F110 → Reconciliation</div>
           </div>
-          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
-            <div style="font-size:1.2rem;margin-bottom:0.3rem;">⌨️</div>
-            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;">10 T-Codes Learned</div>
-            <div style="font-size:0.7rem;color:var(--muted);">FB60, MIRO, F110, FK10N, MRBR, FBL1N + more</div>
+          <div class="completion-stat">
+            <div class="completion-stat-icon">⌨️</div>
+            <div class="completion-stat-num">10 T-Codes</div>
+            <div class="completion-stat-label">FB60, MIRO, F110, FK10N, MRBR, FBL1N + more</div>
           </div>
-          <div style="background:var(--surface);border-radius:8px;padding:0.9rem;">
-            <div style="font-size:1.2rem;margin-bottom:0.3rem;">⭐</div>
-            <div style="font-weight:700;font-size:0.78rem;color:var(--ink2);margin-bottom:0.2rem;"><span id="final-xp">0</span> XP Earned</div>
-            <div style="font-size:0.7rem;color:var(--muted);">From quizzes, checklists & interactive simulations</div>
+          <div class="completion-stat">
+            <div class="completion-stat-icon">⭐</div>
+            <div class="completion-stat-num"><span id="final-xp">0</span> XP Earned</div>
+            <div class="completion-stat-label">From quizzes, simulations &amp; interactive exercises</div>
           </div>
         </div>
-        <div class="cert-seal">✅ &nbsp; Verified Completion · SAP FI-AP Module</div>
+        <div class="completion-badge">✅ &nbsp; SAP FI-AP: Accounts Payable Essentials — Completed</div>
       </div>
     </div>
   </div>
@@ -1582,9 +1786,61 @@ body {
 </div>
 
 <script>
-const TOTAL = 10;
+const TOTAL = 11;
 let current = 1;
 let xp = 0;
+
+// ── INTERACTION TRACKING ──
+// Map: slideId -> Set of clicked element keys
+const slideClicks = {};
+
+function trackClick(el, slideId) {
+  if (!slideClicks[slideId]) slideClicks[slideId] = new Set();
+  // Use element's position index within its slide as unique key
+  const slide = document.querySelector(`.slide[data-interactive="${slideId}"]`);
+  if (!slide) return;
+  const allClickables = slide.querySelectorAll('[onclick*="trackClick"]');
+  let key = -1;
+  allClickables.forEach((c, i) => { if (c === el) key = i; });
+  if (key === -1) key = el.dataset.id || slideClicks[slideId].size;
+  slideClicks[slideId].add(String(key));
+  checkInteractionComplete(slideId);
+}
+
+function checkInteractionComplete(slideId) {
+  const slide = document.querySelector(`.slide[data-interactive="${slideId}"]`);
+  if (!slide) return;
+  const required = parseInt(slide.dataset.required || '0');
+  const count = slideClicks[slideId] ? slideClicks[slideId].size : 0;
+  const hint = document.getElementById('hint-' + slideId);
+  if (count >= required) {
+    if (hint) {
+      hint.classList.add('done');
+      hint.innerHTML = '<span class="hint-dot"></span> All done — you can continue!';
+    }
+    // unlock next button if this is the current slide
+    if (current === parseInt(slide.dataset.slide)) unlockNext();
+  }
+}
+
+function isSlideUnlocked(slideNum) {
+  const slide = document.querySelector(`.slide[data-slide="${slideNum}"]`);
+  if (!slide) return true;
+  const slideId = slide.dataset.interactive;
+  if (!slideId) return true; // no interaction required
+  const required = parseInt(slide.dataset.required || '0');
+  const count = slideClicks[slideId] ? slideClicks[slideId].size : 0;
+  return count >= required;
+}
+
+function unlockNext() {
+  const nb = document.getElementById('next-btn');
+  nb.disabled = false;
+  nb.classList.remove('locked-hint');
+  if (current < TOTAL) {
+    nb.textContent = 'Next →';
+  }
+}
 
 // ── BREADCRUMBS ──
 const bc = document.getElementById('breadcrumbs');
@@ -1592,7 +1848,6 @@ for(let i=1;i<=TOTAL;i++){
   const d=document.createElement('div');
   d.className='crumb'+(i===1?' active':'');
   d.title='Slide '+i;
-  d.onclick=()=>goTo(i);
   bc.appendChild(d);
 }
 
@@ -1600,9 +1855,23 @@ function updateUI(){
   document.getElementById('cur-num').textContent=current;
   document.getElementById('tot-num').textContent=TOTAL;
   document.getElementById('progress-fill').style.width=(current/TOTAL*100)+'%';
-  document.getElementById('prev-btn').disabled=current===1;
+  const pb=document.getElementById('prev-btn');
+  pb.disabled=current===1;
+  pb.style.visibility=current===1?'hidden':'visible';
   const nb=document.getElementById('next-btn');
-  nb.textContent=current===TOTAL?'↺ Restart':'Next →';
+  if(current===TOTAL){
+    nb.textContent='↺ Restart';
+    nb.disabled=false;
+    nb.classList.remove('locked-hint');
+  } else if(!isSlideUnlocked(current)){
+    nb.textContent='Next →';
+    nb.disabled=true;
+    nb.classList.add('locked-hint');
+  } else {
+    nb.textContent='Next →';
+    nb.disabled=false;
+    nb.classList.remove('locked-hint');
+  }
   bc.querySelectorAll('.crumb').forEach((c,i)=>{
     c.className='crumb';
     if(i+1<current)c.classList.add('done');
@@ -1776,7 +2045,6 @@ function resetMatch(){
   selectedTC=null; selectedDesc=null; matchedPairs=0;
   document.getElementById('match-score').textContent='';
   document.getElementById('match-feedback').style.display='none';
-  // re-attach events
   document.querySelectorAll('.match-item').forEach(m=>{
     const col=m.closest('.match-game');
     if(col){
