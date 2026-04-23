@@ -1033,14 +1033,12 @@ body {
     <div class="xp-display">
       <div class="xp-badge">⭐ <span id="xp-display">0</span> XP</div>
     </div>
-    <div class="slide-counter">Slide <span id="cur-num">1</span> / <span id="tot-num">11</span></div>
+    <span id="cur-num" style="display:none">1</span><span id="tot-num" style="display:none">11</span>
   </div>
 </div>
 
-<!-- PROGRESS -->
-<div class="progress-bar-wrap">
-  <div class="progress-fill" id="progress-fill" style="width:10%"></div>
-</div>
+<!-- PROGRESS (hidden) -->
+<div style="display:none"><div id="progress-fill"></div></div>
 
 <!-- SLIDES -->
 <div class="slides-wrapper">
@@ -1049,7 +1047,6 @@ body {
   <div class="slide v-center active" data-slide="1" data-interactive="s1-obj" data-required="5">
     <div class="two-col">
       <div>
-        <div class="slide-tag">Course Introduction</div>
         <h1 class="slide-h1">SAP <span class="hi">Accounts Payable</span><br>Essentials</h1>
         <p class="slide-body">
           Master the end-to-end Accounts Payable process in <strong>SAP FI-AP</strong> — from vendor master setup and invoice entry to payment runs and reconciliation. This course is designed for finance clerks, AP specialists, and ERP users working in SAP ECC or S/4HANA environments.
@@ -1115,7 +1112,6 @@ body {
   </div>
   <div class="slide v-center" data-slide="2">
     <div style="max-width:860px;margin:0 auto;width:100%;">
-      <div class="slide-tag">Getting Started</div>
       <h2 class="slide-h2">How to <span class="hi">Navigate</span> This Course</h2>
       <p class="slide-body" style="margin-bottom:0;">Familiarise yourself with the course controls before you begin. You'll use all of these throughout the lessons.</p>
       <div class="nav-guide-grid">
@@ -1134,20 +1130,6 @@ body {
           </div>
         </div>
         <div class="nav-guide-card">
-          <div class="nav-guide-icon" style="background:rgba(10,191,138,0.1);color:var(--sap-teal);">▬</div>
-          <div>
-            <div class="nav-guide-title">Progress Bar</div>
-            <div class="nav-guide-desc">The blue-green bar at the top tracks your progress automatically as you advance through slides.</div>
-          </div>
-        </div>
-        <div class="nav-guide-card">
-          <div class="nav-guide-icon" style="background:rgba(124,58,237,0.1);color:var(--sap-purple);">12</div>
-          <div>
-            <div class="nav-guide-title">Slide Counter</div>
-            <div class="nav-guide-desc">The counter in the top-right shows your current position — e.g. Slide <strong>02 / 11</strong>.</div>
-          </div>
-        </div>
-        <div class="nav-guide-card">
           <div class="nav-guide-icon" style="background:rgba(240,165,0,0.1);color:var(--sap-amber);">👆</div>
           <div>
             <div class="nav-guide-title">Interactive Elements</div>
@@ -1163,7 +1145,7 @@ body {
         </div>
       </div>
       <div class="nav-tip-bar">
-        💡 <strong>Tip:</strong> On slides with interactive elements, the <strong>Next</strong> button is locked until you've explored all clickable items. The instruction inside each card or box tells you exactly what to click. Once complete, the Next button activates automatically.
+        💡 <strong>Tip:</strong> You can revisit any slide by clicking <strong>← Previous</strong> — your XP and completed interactions are saved for the session, so you won't lose your progress by going back.
       </div>
     </div>
   </div>
@@ -1741,7 +1723,6 @@ body {
   <!-- SLIDE 11: COURSE COMPLETION -->
   <div class="slide v-center" data-slide="11">
     <div style="max-width:680px;margin:0 auto;text-align:center;">
-      <div class="slide-tag" style="justify-content:center">Course Complete</div>
       <div class="completion-wrap">
         <span class="completion-icon">🏆</span>
         <div class="completion-title">Course Complete!</div>
@@ -1905,6 +1886,7 @@ function goTo(n,dir){
     },370);
   }));
   current=n;
+  if(n===TOTAL) setTimeout(playSuccessSound,370);
   updateUI();
 }
 function navigate(dir){
@@ -2070,6 +2052,107 @@ function answerQ(qid,btn,result){
 }
 
 updateUI();
+
+// ── SOUND EFFECTS ──
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+// Clickable sound: soft "pop" / click (short, pleasant)
+function playClickableSound(){
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.13);
+  }catch(e){}
+}
+
+// Nav sound: distinct "whoosh" tone (lower, sweeping)
+function playNavSound(){
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.14, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.23);
+  }catch(e){}
+}
+
+// Patch clickable elements with sound
+function patchClickableSounds(){
+  // All interactive clickables (flow-step, reveal-card, tab, check-item, match-item, ap-kpi, sap-tb-btn, choice-btn, match-check-btn)
+  const clickableSelectors = [
+    '.flow-step', '.reveal-card', '.tab', '.check-item',
+    '.match-item', '.ap-kpi', '.sap-tb-btn', '.choice-btn',
+    '.match-check-btn', '.sap-menu-item'
+  ].join(',');
+
+  document.querySelectorAll(clickableSelectors).forEach(el => {
+    el.addEventListener('click', () => playClickableSound(), true);
+  });
+
+  // Nav buttons get a different sound
+  document.getElementById('prev-btn').addEventListener('click', () => playNavSound(), true);
+  document.getElementById('next-btn').addEventListener('click', () => playNavSound(), true);
+}
+
+// Run after DOM is ready (we're already at bottom of body)
+patchClickableSounds();
+// ── SUCCESS FANFARE (last slide) ──
+function playSuccessSound(){
+  try{
+    const ctx = getAudioCtx();
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.13;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    });
+    // Sparkle shimmer on top
+    setTimeout(()=>{
+      const osc2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      osc2.connect(g2); g2.connect(ctx.destination);
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(2093, ctx.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(1047, ctx.currentTime + 0.3);
+      g2.gain.setValueAtTime(0.09, ctx.currentTime);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc2.start(ctx.currentTime);
+      osc2.stop(ctx.currentTime + 0.36);
+    }, notes.length * 130);
+  }catch(e){}
+}
+
+
 </script>
 </body>
 </html>
